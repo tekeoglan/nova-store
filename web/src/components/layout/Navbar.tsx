@@ -1,12 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, ShoppingCart, User } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 
 export const Navbar = () => {
+  const [mounted, setMounted] = useState(false);
   const totalItems = useCartStore((state) => state.totalItems());
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <nav className="w-full bg-white border-b border-outline-variant px-4 py-3 flex items-center justify-between sticky top-0 z-50">
@@ -30,7 +35,7 @@ export const Navbar = () => {
         <div className="flex items-center gap-6">
           <Link href="/cart" className="relative p-2 text-on-surface hover:text-primary transition-colors">
             <ShoppingCart size={24} />
-            {totalItems > 0 && (
+            {mounted && totalItems > 0 && (
               <span className="absolute top-0 right-0 bg-accent-energy text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                 {totalItems}
               </span>
