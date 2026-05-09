@@ -1,13 +1,15 @@
+'use client'
+
 import Link from 'next/link';
-import { 
-  LayoutDashboard, 
-  AlertTriangle, 
-  History, 
-  UserSearch, 
-  PieChart, 
-  Trophy, 
-  Clock, 
-  LogOut 
+import {
+  LayoutDashboard,
+  AlertTriangle,
+  History,
+  UserSearch,
+  PieChart,
+  Trophy,
+  Clock,
+  LogOut
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
@@ -29,12 +31,12 @@ export default function AdminSidebar() {
       <div className="p-6 text-2xl font-bold border-b border-slate-800">
         NovaStore Admin
       </div>
-      
+
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {menuItems.map((item) => (
-          <Link 
-            key={item.href} 
-            href={item.href} 
+          <Link
+            key={item.href}
+            href={item.href}
             className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-white"
           >
             <item.icon size={20} />
@@ -44,7 +46,7 @@ export default function AdminSidebar() {
       </nav>
 
       <div className="p-4 border-t border-slate-800">
-        <button 
+        <button
           onClick={logout}
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-900/20 text-slate-400 hover:text-red-400 w-full transition-colors"
         >
