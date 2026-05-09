@@ -28,9 +28,8 @@ Her rapor için özel bir görünüm:
 ## 4. Görsel Dil ve UI Prensipleri
 - **Renk Paleti:** Profesyonel koyu mavi/gri tonları, dikkat çekici vurgu renkleri (Sarı: Uyarı, Kırmızı: Kritik, Yeşil: Başarılı).
 - **Bileşenler:** Responsive tablolar, Search-bar'lar, Date-picker'lar ve yan menü (Sidebar) navigasyonu.
-- **Responsive:** Mobil cihazlarda tabloların kaydırılabilir (scrollable) olması.
 
 ## 5. Teknik Entegrasyon Planı
 - **Frontend:** React veya Vue.js (Önerilen).
-- **State Management:** JWT token'ın `localStorage` veya `cookie` üzerinde tutulması.
+- **State Management:** JWT token'ın `cookie` üzerinde tutulması.
 - **API Bağlantısı:** Axios/Fetch ile `/api/auth` ve `/api/reports` endpointlerinin tüketilmesi.
