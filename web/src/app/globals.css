@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-surface: #fbf8ff;
+  --color-primary: #003ec7;
+  --color-on-primary: #ffffff;
+  --color-on-surface: #191b25;
+  --color-outline: #737688;
+  --color-text-primary: #091E42;
+  --color-text-secondary: #44546F;
+  --color-surface-main: #FFFFFF;
+  --color-surface-muted: #F4F5F7;
+  --color-accent-energy: #FF6B00;
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Typography - Custom utilities can be handled via classes or theme extensions */
+}
+
+:root {
+  --background: var(--color-surface);
+  --foreground: var(--color-on-surface);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Manrope', Arial, Helvetica, sans-serif;
+}
+
