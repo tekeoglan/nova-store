@@ -1,0 +1,77 @@
+export const MOCK_PRODUCT_DETAILS = {
+  id: '1',
+  name: 'Aura Studio Pro',
+  category: 'Electronics',
+  breadcrumb: ['Home', 'Electronics', 'Aura Studio Pro Wireless Speaker'],
+  price: 299.00,
+  oldPrice: 349.00,
+  rating: 4.5,
+  reviews: 128,
+  stockStatus: 'In Stock & Ready to Ship',
+  description: 'Experience room-filling, spatial audio with the Aura Studio Pro. Crafted with premium materials and acoustic precision, it seamlessly blends into your modern workspace while delivering uncompromising sound quality.',
+  colors: [
+    { name: 'Matte Charcoal', value: '#2c3e50' },
+    { name: 'Cloud White', value: '#f5f5f5' },
+    { name: 'Champagne Gold', value: '#d4af37' },
+  ],
+  images: [
+    'https://images.unsplash.com/photo-1545454675-35317859755a?q=80&w=1470&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1589492477859-379637960263?q=80&w=1470&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1399&auto=format&fit=crop',
+  ],
+  features: [
+    {
+      icon: 'Spatial',
+      title: '360° Spatial Audio',
+      description: 'Custom-tuned drivers deliver immersive sound in every direction.',
+    },
+    {
+      icon: 'Battery',
+      title: '24-Hour Battery',
+      description: 'Power through your entire day and night on a single charge.',
+    },
+    {
+      icon: 'Waterproof',
+      title: 'IP67 Waterproof',
+      description: 'Fully protected against dust and submersible in water.',
+    },
+  ],
+  specs: {
+    'Bluetooth Version': '5.3',
+    'Weight': '1.2 kg (2.6 lbs)',
+    'Dimensions': '210 x 180 x 180 mm',
+    'Output Power': '60W RMS',
+    'Charging Time': '2.5 Hours (USB-C)',
+    'App Integration': 'Nova Connect (iOS/Android)',
+  },
+  relatedProducts: [
+    {
+      id: 'r1',
+      name: 'Nova Buds Pro',
+      category: 'Noise Cancelling',
+      price: 149.00,
+      image: 'https://images.unsplash.com/photo-1590658268037-6bf127f0d675?q=80&w=1470&auto=format&fit=crop',
+    },
+    {
+      id: 'r2',
+      name: 'Aura Studio Max',
+      category: 'Over-Ear Audio',
+      price: 399.00,
+      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1470&auto=format&fit=crop',
+    },
+    {
+      id: 'r3',
+      name: 'Nova Hub Home',
+      category: 'Smart Display',
+      price: 129.00,
+      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1470&auto=format&fit=crop',
+    },
+    {
+      id: 'r4',
+      name: 'PowerBase Pro',
+      category: 'Wireless Charger',
+      price: 49.00,
+      image: 'https://images.unsplash.com/photo-1615526665377-697667935742?q=80&w=1470&auto=format&fit=crop',
+    },
+  ],
+};

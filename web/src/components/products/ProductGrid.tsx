@@ -82,6 +82,22 @@ const MOCK_PRODUCTS: Product[] = [
 export const ProductGrid = () => {
   const { sortBy, setSortBy } = useFilterStore();
 
+  const sortedProducts = React.useMemo(() => {
+    const products = [...MOCK_PRODUCTS];
+    
+    switch (sortBy) {
+      case 'Price Low to High':
+        return products.sort((a, b) => a.price - b.price);
+      case 'Price High to Low':
+        return products.sort((a, b) => b.price - a.price);
+      case 'Popularity':
+        return products.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+      case 'Recommended':
+      default:
+        return products;
+    }
+  }, [sortBy]);
+
   return (
     <div className="flex-1">
       <div className="flex justify-between items-center mb-6">
@@ -108,7 +124,7 @@ export const ProductGrid = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_PRODUCTS.map((product) => (
+        {sortedProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
