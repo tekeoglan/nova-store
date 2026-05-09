@@ -4,14 +4,14 @@ const Product = require('../models/Product');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const OrderDetail = require('../models/OrderDetail');
+const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 async function seed() {
   try {
-    // Veritabanını sıfırla ve tabloları oluştur
     await sequelize.sync({ force: true });
     console.log('Database synchronized.');
 
-    // 1. Kategorileri ekle
     const categoriesData = [
       { CategoryName: 'Elektronik' },
       { CategoryName: 'Giyim' },
@@ -22,7 +22,6 @@ async function seed() {
     const categories = await Category.bulkCreate(categoriesData);
     console.log('Categories seeded.');
 
-    // 2. Ürünleri ekle
     const productsData = [
       { ProductName: 'Akıllı Telefon', Price: 15000, Stock: 15, CategoryID: categories[0].CategoryID },
       { ProductName: 'Laptop', Price: 25000, Stock: 5, CategoryID: categories[0].CategoryID },
@@ -40,7 +39,6 @@ async function seed() {
     const products = await Product.bulkCreate(productsData);
     console.log('Products seeded.');
 
-    // 3. Müşterileri ekle
     const customersData = [
       { FullName: 'Ahmet Yılmaz', City: 'İstanbul', Email: 'ahmet@example.com' },
       { FullName: 'Ayşe Demir', City: 'Ankara', Email: 'ayse@example.com' },
@@ -52,7 +50,10 @@ async function seed() {
     const customers = await Customer.bulkCreate(customersData);
     console.log('Customers seeded.');
 
-    // 4. Siparişleri ve Detayları ekle
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    await User.create({ Username: 'admin', Password: hashedPassword });
+    console.log('Admin user seeded.');
+
     const ordersData = [
       { CustomerID: customers[0].CustomerID, TotalAmount: 16200, OrderDate: new Date('2026-01-10') },
       { CustomerID: customers[1].CustomerID, TotalAmount: 25000, OrderDate: new Date('2026-02-15') },
