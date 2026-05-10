@@ -1,8 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const reportRoutes = require('./routes/reports');
 const authRoutes = require('./routes/auth');
+const appConfig = require('./config/app')
+const seed = require('./database/seed')
 
 // Modelleri içe aktar (Sadece ilişkilerin kurulması için)
 require('./models/Category');
@@ -12,10 +15,11 @@ require('./models/Order');
 require('./models/OrderDetail');
 require('./models/User');
 
-const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = appConfig.port;
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+const app = express();
+
+app.use(cors({ origin: appConfig.webURL }));
 app.use(express.json());
 
 // Rotaları ekle
@@ -32,6 +36,10 @@ async function startServer() {
     // Veritabanı şemasını senkronize et
     await sequelize.sync();
     console.log('Database synchronized successfully.');
+
+    if (appConfig.env == "development") {
+      seed()
+    }
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
