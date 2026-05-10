@@ -6,7 +6,7 @@ const User = require('../models/User');
 const { JWT_SECRET } = require('../middleware/authMiddleware');
 
 // Register
-router.post('/register', async (req, res) => {
+router.post('/signup', async (req, res) => {
   try {
     const { username, password } = req.body;
     
