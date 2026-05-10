@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const sequelize = require('./config/database');
 const reportRoutes = require('./routes/reports');
 const authRoutes = require('./routes/auth');
@@ -14,6 +15,7 @@ require('./models/User');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 
 // Rotaları ekle
