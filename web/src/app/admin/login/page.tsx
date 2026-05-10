@@ -4,15 +4,21 @@ import { useForm } from 'react-hook-form';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 export default function LoginPage() {
-  const { setAuth } = useAuthStore();
+  const { setAuth, isAuthenticated } = useAuthStore();
   const router = useRouter();
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/admin');
+    }
+  }, [isAuthenticated, router]);
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {

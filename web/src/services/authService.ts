@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -9,10 +9,10 @@ const api = axios.create({
 
 // Interceptor to add auth token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth-storage') 
-    ? JSON.parse(localStorage.getItem('auth-storage') || '{}').state.token 
+  const token = localStorage.getItem('auth-storage')
+    ? JSON.parse(localStorage.getItem('auth-storage') || '{}').state.token
     : null;
-  
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -29,7 +29,7 @@ export const authService = {
     return response.data;
   },
   async signup(userData: any) {
-    const response = await api.post('/auth/signup', userData);
+    const response = await api.post('/auth/register', userData);
     return response.data;
   },
 };
