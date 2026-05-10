@@ -37,7 +37,7 @@ export default function LowStockPage() {
     { 
       header: 'Stok Miktarı', 
       accessor: 'Stock',
-      render: (val: number) => (
+      render: (val: number) => val === undefined ? '-' : (
         <span className={`font-bold ${val < 10 ? 'text-red-600' : 'text-amber-600'}`}>
           {val}
         </span>
@@ -46,7 +46,7 @@ export default function LowStockPage() {
     { 
       header: 'Birim Fiyat', 
       accessor: 'UnitPrice',
-      render: (val: number) => `₺${val.toFixed(2)}`
+      render: (val: number) => val === undefined ? '-' : `₺${val.toFixed(2)}`
     },
     { 
       header: 'Aksiyon', 
