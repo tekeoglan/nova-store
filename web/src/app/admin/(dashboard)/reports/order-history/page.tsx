@@ -18,7 +18,6 @@ export default function OrderHistoryPage() {
       try {
         const response = await api.get('/reports/order-history');
         setOrders(response.data);
-        setFilteredOrders(response.data);
       } catch (error) {
         console.error('Error fetching orders:', error);
       } finally {
