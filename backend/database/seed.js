@@ -5,6 +5,7 @@ const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const OrderDetail = require('../models/OrderDetail');
 const User = require('../models/User');
+const Staff = require('../models/Staff');
 const bcrypt = require('bcryptjs');
 
 async function seed() {
@@ -50,6 +51,12 @@ async function seed() {
     const hashedPassword = await bcrypt.hash('admin123', 10);
     await User.create({ Username: 'admin', PasswordHash: hashedPassword });
     console.log('Admin user seeded.');
+
+    const staffAdminHash = await bcrypt.hash('admin123', 10);
+    await Staff.create({ Email: 'admin@novastore.com', PasswordHash: staffAdminHash, Role: 'admin' });
+    const staffModHash = await bcrypt.hash('mod123', 10);
+    await Staff.create({ Email: 'mod@novastore.com', PasswordHash: staffModHash, Role: 'moderator' });
+    console.log('Staff accounts seeded.');
 
     const ordersData = [
       { CustomerID: customers[0].CustomerID, TotalAmount: 16200, OrderDate: new Date('2026-01-10') },
