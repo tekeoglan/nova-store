@@ -24,7 +24,7 @@ const menuItems = [
 ];
 
 export default function AdminSidebar() {
-  const { logout } = useAuthStore();
+  const { staffAuth } = useAuthStore();
 
   return (
     <div className="w-64 h-screen bg-slate-900 text-white flex flex-col fixed left-0 top-0">
@@ -47,7 +47,7 @@ export default function AdminSidebar() {
 
       <div className="p-4 border-t border-slate-800">
         <button
-          onClick={logout}
+          onClick={staffAuth.logout}
           className="flex items-center gap-3 p-3 rounded-lg hover:bg-red-900/20 text-slate-400 hover:text-red-400 w-full transition-colors"
         >
           <LogOut size={20} />

@@ -5,21 +5,27 @@ import api from '@/services/authService';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 
+interface OrderDetail {
+  Product: { ProductName: string };
+  Quantity: number;
+}
+
+interface CustomerOrder {
+  OrderID: number;
+  OrderDate: string;
+  TotalAmount: number;
+  OrderDetails: OrderDetail[];
+}
+
+interface Customer {
+  FullName: string;
+  City: string;
+  Orders: CustomerOrder[];
+}
+
 export default function CustomerSearchPage() {
   const [query, setQuery] = useState('');
-  const [customer, setCustomer] = useState<{
-    FullName: string;
-    City: string;
-    Orders: Array<{
-      OrderID: number;
-      OrderDate: string;
-      TotalAmount: number;
-      OrderDetails: Array<{
-        Product: { ProductName: string };
-        Quantity: number;
-      }>;
-    }>;
-  } | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -33,8 +39,9 @@ export default function CustomerSearchPage() {
     try {
       const response = await api.get(`/reports/customer-purchases/${encodeURIComponent(query)}`);
       setCustomer(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Müşteri bulunamadı.');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Müşteri bulunamadı.');
     } finally {
       setLoading(false);
     }
@@ -79,14 +86,14 @@ export default function CustomerSearchPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {customer.Orders?.map((order: any, idx: number) => (
+            {customer.Orders?.map((order, idx) => (
               <div key={idx} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                   <span className="text-sm font-medium text-slate-500">Sipariş #{order.OrderID}</span>
                   <span className="text-sm text-slate-400">{order.OrderDate}</span>
                 </div>
                 <div className="space-y-2">
-                  {order.OrderDetails?.map((detail: any, dIdx: number) => (
+                  {order.OrderDetails?.map((detail, dIdx) => (
                     <div key={dIdx} className="flex justify-between text-sm">
                       <span className="text-slate-600">{detail.Product?.ProductName}</span>
                       <span className="font-medium text-slate-900">x{detail.Quantity}</span>

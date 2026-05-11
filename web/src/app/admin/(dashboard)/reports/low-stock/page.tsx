@@ -3,36 +3,47 @@
 import { useEffect, useState } from 'react';
 import api from '@/services/authService';
 import ReportsTable from '@/app/admin/components/ReportsTable';
-import { Button } from '@/components/ui/Button';
+import { useRouter } from 'next/navigation';
 
 export default function LowStockPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchLowStock = async () => {
       try {
         const response = await api.get('/reports/low-stock');
         setProducts(response.data);
-      } catch (error) {
-        console.error('Error fetching low stock:', error);
+      } catch (err: unknown) {
+        const error = err as { response?: { status?: number } };
+        if (error.response?.status === 403) {
+          setError('Bu sayfaya erişim yetkiniz bulunmamaktadır.');
+        } else if (err.response?.status === 401) {
+          router.push('/admin/login');
+        } else {
+          setError('Veriler yüklenirken bir hata oluştu.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchLowStock();
-  }, []);
+  }, [router]);
+
+  if (loading) return <div className="text-center p-8 text-slate-500">Yükleniyor...</div>;
+  if (error) return (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <div className="text-red-500 text-lg font-medium mb-4">{error}</div>
+    </div>
+  );
 
   const columns = [
     { 
       header: 'Ürün Adı', 
       accessor: 'ProductName' 
-    },
-    { 
-      header: 'Kategori', 
-      accessor: 'Category', 
-      render: (_, item: { Category?: { CategoryName: string } }) => item.Category?.CategoryName || 'Belirtilmemiş' 
     },
     { 
       header: 'Stok Miktarı', 
@@ -45,21 +56,10 @@ export default function LowStockPage() {
     },
     { 
       header: 'Birim Fiyat', 
-      accessor: 'UnitPrice',
+      accessor: 'Price',
       render: (val: number) => val === undefined ? '-' : `₺${val.toFixed(2)}`
     },
-    { 
-      header: 'Aksiyon', 
-      accessor: 'id',
-      render: (_, item: { ProductName: string }) => (
-        <Button size="sm" onClick={() => alert(`${item.ProductName} için sipariş oluşturuluyor...`)}>
-          Siparişe Dönüştür
-        </Button>
-      )
-    },
   ];
-
-  if (loading) return <div className="text-center p-8 text-slate-500">Yükleniyor...</div>;
 
   return (
     <div>

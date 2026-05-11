@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 interface Column {
   header: string;
   accessor: string;
-  render?: (value: any, item: any) => ReactNode;
+  render?: (value: any, item: any, index: number) => ReactNode;
 }
 
 interface ReportsTableProps {
@@ -38,7 +38,7 @@ export default function ReportsTable({ columns, data, emptyMessage = 'Veri bulun
             <tr key={itemIdx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
               {columns.map((col, colIdx) => (
                 <td key={colIdx} className="p-4 text-sm text-slate-600">
-                  {col.render ? col.render(item[col.accessor], item) : item[col.accessor]}
+                  {col.render ? col.render(item[col.accessor], item, itemIdx) : item[col.accessor]}
                 </td>
               ))}
             </tr>

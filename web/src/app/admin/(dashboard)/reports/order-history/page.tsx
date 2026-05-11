@@ -5,8 +5,18 @@ import api from '@/services/authService';
 import ReportsTableComp from '@/app/admin/components/ReportsTable';
 import { Input } from '@/components/ui/Input';
 
+interface Order {
+  OrderID: number;
+  OrderDate: string;
+  TotalAmount: number;
+  Customer?: {
+    FullName: string;
+    City: string;
+  };
+}
+
 export default function OrderHistoryPage() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     customer: '',
@@ -31,12 +41,12 @@ export default function OrderHistoryPage() {
   const filteredOrders = useMemo(() => {
     let filtered = orders;
     if (filters.customer) {
-      filtered = filtered.filter((o: any) => 
+      filtered = filtered.filter((o) => 
         o.Customer?.FullName?.toLowerCase().includes(filters.customer.toLowerCase())
       );
     }
     if (filters.date) {
-      filtered = filtered.filter((o: any) => o.OrderDate?.includes(filters.date));
+      filtered = filtered.filter((o) => o.OrderDate?.includes(filters.date));
     }
     return filtered;
   }, [filters, orders]);
@@ -46,12 +56,12 @@ export default function OrderHistoryPage() {
     { 
       header: 'Müşteri', 
       accessor: 'Customer', 
-      render: (_, item: any) => item.Customer?.FullName 
+      render: (_: unknown, item: Order) => item.Customer?.FullName 
     },
     { 
       header: 'Şehir', 
       accessor: 'Customer', 
-      render: (_, item: any) => item.Customer?.City 
+      render: (_: unknown, item: Order) => item.Customer?.City 
     },
     { 
       header: 'Toplam Tutar', 

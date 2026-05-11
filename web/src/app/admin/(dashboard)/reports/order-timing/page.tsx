@@ -2,26 +2,42 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/services/authService';
+import { useRouter } from 'next/navigation';
 import ReportsTable from '@/app/admin/components/ReportsTable';
 
+interface OrderTiming {
+  OrderID: number;
+  OrderDate: string;
+  daysPassed: number;
+}
+
 export default function OrderTimingPage() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<OrderTiming[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTiming = async () => {
       try {
         const response = await api.get('/reports/order-timing');
         setOrders(response.data);
-      } catch (error) {
-        console.error('Error fetching timing:', error);
+      } catch (err: unknown) {
+        const error = err as { response?: { status?: number } };
+        if (error.response?.status === 403) {
+          setError('Bu sayfaya erişim yetkiniz bulunmamaktadır.');
+        } else if (error.response?.status === 401) {
+          router.push('/admin/login');
+        } else {
+          setError('Veriler yüklenirken bir hata oluştu.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchTiming();
-  }, []);
+  }, [router]);
 
   const getAgeColor = (days: number) => {
     if (days <= 7) return 'bg-green-100 text-green-700 border-green-200';
@@ -44,6 +60,11 @@ export default function OrderTimingPage() {
   ];
 
   if (loading) return <div className="text-center p-8 text-slate-500">Yükleniyor...</div>;
+  if (error) return (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <div className="text-red-500 text-lg font-medium mb-4">{error}</div>
+    </div>
+  );
 
   return (
     <div>
