@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const Customer = require('./Customer');
 
 const User = sequelize.define('User', {
   UserID: {
@@ -7,18 +8,27 @@ const User = sequelize.define('User', {
     primaryKey: true,
     autoIncrement: true,
   },
+  CustomerID: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Customer,
+      key: 'CustomerID'
+    },
+  },
   Username: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(64),
     allowNull: false,
     unique: true,
   },
-  Password: {
-    type: DataTypes.STRING,
+  PasswordHash: {
+    type: DataTypes.STRING(255),
     allowNull: false,
   },
 }, {
   tableName: 'Users',
   timestamps: true,
 });
+
+User.belongsTo(Customer, { foreignKey: 'CustomerID' });
 
 module.exports = User;
