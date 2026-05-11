@@ -38,7 +38,7 @@ async function startServer() {
     console.log('Database synchronized successfully.');
 
     if (appConfig.env == "development") {
-      seed()
+      await seed()
     }
 
     app.listen(PORT, () => {
