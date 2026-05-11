@@ -17,28 +17,31 @@ The NovaStore backend is a RESTful API designed to manage an e-commerce database
 backend/
 ├── config/
 │   └── database.js      # Sequelize connection and SQLite storage path
+├── database/
+│   └── seed.js          # Database initialization and dummy data population
 ├── middleware/
 │   └── authMiddleware.js # JWT verification and request protection
 ├── models/              # Sequelize model definitions (mapped to SQLite tables)
 │   ├── Category.js
 │   ├── Product.js
-│   ├── Customer.js
+│   ├── Customer.js      # Customer profile data
 │   ├── Order.js
-│   └── OrderDetail.js
-│   └── User.js          # Authentication user model
+│   ├── OrderDetail.js
+│   └── User.js          # Authentication model (references Customer)
 ├── routes/
 │   ├── auth.js          # Registration and Login endpoints
 │   └── reports.js       # Protected analytical report endpoints
-├── seeders/
-│   └── seed.js          # Database initialization and dummy data population
+├── tests/
+│   ├── test-auth.js     # Auth integration tests
+│   └── test-api.js      # Report endpoint tests
 └── server.js            # App entry point and server configuration
 ```
 
 ## Key Implementation Details
 
 ### 1. Authentication Flow
-- **Registration:** `POST /api/auth/register` $\rightarrow$ Hashes password $\rightarrow$ Stores in `Users` table.
-- **Login:** `POST /api/auth/login` $\rightarrow$ Verifies hash $\rightarrow$ Issues JWT.
+- **Registration:** `POST /api/auth/signup` $\rightarrow$ Accepts `{username, password, fullName, email}` $\rightarrow$ Creates `Customer` and `User` in a transaction $\rightarrow$ User references Customer via `CustomerID` foreign key.
+- **Login:** `POST /api/auth/login` $\rightarrow$ Verifies hash against `PasswordHash` $\rightarrow$ Issues JWT.
 - **Protection:** Reports routes are wrapped in `authMiddleware`. Requests must include `Authorization: Bearer <token>`.
 
 ### 2. Reporting Logic
@@ -53,8 +56,8 @@ The `/api/reports` endpoints implement complex SQL logic via Sequelize:
 
 ## Development Commands
 - **Start Server:** `node server.js`
-- **Populate Data:** `node seeders/seed.js`
-- **Run Tests:** `node test-auth.js` (Auth flow) or `node test-api.js` (Report flow).
+- **Populate Data:** Run `node server.js` in development mode (auto-seeds on startup)
+- **Run Tests:** `node tests/test-auth.js` (Auth flow) or `node tests/test-api.js` (Report flow).
 
 ## Constraints & Guidelines
 - **Security:** Do not log plain-text passwords.
