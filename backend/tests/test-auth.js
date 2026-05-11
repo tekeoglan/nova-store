@@ -23,14 +23,14 @@ async function runTest() {
       try {
         // 1. Register
         const regRes = await request({
-          hostname: 'localhost', port: 3000, path: '/api/auth/register', method: 'POST',
+          hostname: 'localhost', port: 8080, path: '/api/auth/register', method: 'POST',
           headers: { 'Content-Type': 'application/json' }
-        }, { username: 'testuser', password: 'password123' });
+        }, { username: 'testuser', password: 'password123', fullName: 'Test User', email: 'testuser@example.com' });
         console.log(`Register: ${regRes.statusCode === 201 ? '✅' : '❌'}`);
 
         // 2. Login
         const loginRes = await request({
-          hostname: 'localhost', port: 3000, path: '/api/auth/login', method: 'POST',
+          hostname: 'localhost', port: 8080, path: '/api/auth/login', method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         }, { username: 'testuser', password: 'password123' });
         console.log(`Login: ${loginRes.statusCode === 200 ? '✅' : '❌'}`);
@@ -38,13 +38,13 @@ async function runTest() {
 
         // 3. Access Report without token
         const reportNoToken = await request({
-          hostname: 'localhost', port: 3000, path: '/api/reports/low-stock', method: 'GET'
+          hostname: 'localhost', port: 8080, path: '/api/reports/low-stock', method: 'GET'
         });
         console.log(`Report (no token): ${reportNoToken.statusCode === 401 ? '✅ (Blocked)' : '❌ (Allowed)'}`);
 
         // 4. Access Report with token
         const reportWithToken = await request({
-          hostname: 'localhost', port: 3000, path: '/api/reports/low-stock', method: 'GET',
+          hostname: 'localhost', port: 8080, path: '/api/reports/low-stock', method: 'GET',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         console.log(`Report (with token): ${reportWithToken.statusCode === 200 ? '✅' : '❌'}`);
