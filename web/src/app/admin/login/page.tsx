@@ -5,36 +5,42 @@ import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
+interface LoginForm {
+  email: string;
+  password: string;
+}
+
 export default function LoginPage() {
-  const { setAuth, isAuthenticated } = useAuthStore();
+  const { staffAuth, isLoading } = useAuthStore();
   const router = useRouter();
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && staffAuth.isAuthenticated) {
       router.push('/admin');
     }
-  }, [isAuthenticated, router]);
+  }, [staffAuth.isAuthenticated, isLoading, router]);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     }
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: LoginForm) => {
     setError('');
     try {
-      const response = await authService.login(data);
-      setAuth({ id: '1', email: data.username, name: data.username }, response.token);
+      const response = await authService.staffLogin(data);
+      const token = response.token;
+      staffAuth.setAuth({ id: '1', email: data.email, role: 'admin' }, token);
       router.push('/admin');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Giriş başarısız oldu. Lütfen bilgilerinizi kontrol edin.');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Giriş başarısız oldu. Lütfen bilgilerinizi kontrol edin.');
     }
   };
 
@@ -48,22 +54,23 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Kullanıcı Adı</label>
-            <Input 
-              {...register('username', { required: 'Kullanıcı adı gereklidir' })} 
-              placeholder="Admin kullanıcı adınız" 
+            <label className="block text-sm font-medium text-slate-700 mb-1">E-posta</label>
+            <Input
+              type="email"
+              {...register('email', { required: 'E-posta gereklidir' })}
+              placeholder="admin@novastore.com"
             />
-            {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username.message as string}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Şifre</label>
-            <Input 
-              type="password" 
-              {...register('password', { required: 'Şifre gereklidir' })} 
-              placeholder="••••••••" 
+            <Input
+              type="password"
+              {...register('password', { required: 'Şifre gereklidir' })}
+              placeholder="••••••••"
             />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message as string}</p>}
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
 
           {error && (
@@ -74,12 +81,6 @@ export default function LoginPage() {
 
           <Button type="submit" className="w-full py-3 text-lg">Giriş Yap</Button>
         </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-slate-600 text-sm">
-            Hesabınız yok mu? <Link href="/admin/register" className="text-blue-600 hover:underline font-medium">Kayıt Olun</Link>
-          </p>
-        </div>
       </div>
     </div>
   );
