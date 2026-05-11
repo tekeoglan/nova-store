@@ -26,11 +26,12 @@ web/src/
 ├── components/        # React components
 │   ├── ui/            # Basic atomic components (Button, Input, etc.)
 │   ├── layout/        # Global layout components (Navbar, Footer)
-│   └── [feature]/     # Feature-specific components
+│   ├── home/          # Home page components (SidebarFilters, Hero)
+│   └── products/      # Product components (ProductGrid, ProductCard)
 ├── services/          # API service layers and Axios configurations
 │   ├── authService.ts  # Auth endpoints and axios instance
 │   └── productService.ts # Product listing and details
-├── store/             # Zustand store definitions
+├── store/             # Zustand store definitions (auth, cart, filter)
 └── data/              # Mock data and constants
 ```
 
@@ -58,6 +59,17 @@ web/src/
   ```
 - **API Token Handling:** The Axios interceptor automatically picks up `staffAuth.token` or `userAuth.token` from localStorage.
 
+### 4. Filter State Management
+- **Filter Store (`filterStore.ts`):** Manages product filtering state (category, price range, sort, search)
+- **Filter Behavior:**
+  - **Search:** Resets filters to defaults, then applies search with default category/price
+  - **Filter Change after Search:** Combines search query with selected filters
+  - **Clear Search Input:** Returns to default filters
+- **Available Filters:**
+  - **Categories:** All, Elektronik, Giyim, Ev ve Yaşam, Kozmetik, Kitap (must match backend Turkish names)
+  - **Price Ranges:** All Prices, Under 500, 500-2000, 2000-10000, Over 10000
+- **Clear Filters:** Use `resetFilters()` to clear all filters including search query
+
 ### 3. API Communication
 - Use `authService` for authentication endpoints (login, signup, etc.)
 - Use `productService` for product-related API calls (`getProducts`, `getProductById`)
@@ -69,11 +81,17 @@ web/src/
 ```typescript
 import { productService, Product, ProductDetail } from '@/services/productService';
 
-// List products
+// List all products
 const products = await productService.getProducts();
 
-// Filter by category
-const products = await productService.getProducts('Electronics');
+// Filter by category (Turkish: Elektronik, Giyim, Ev ve Yaşam, Kozmetik, Kitap)
+const products = await productService.getProducts('Elektronik');
+
+// Filter by category with price range
+const products = await productService.getProducts('Elektronik', 500, 2000);
+
+// Filter with search query
+const products = await productService.getProducts(undefined, undefined, undefined, 'telefon');
 
 // Get single product
 const product = await productService.getProductById('1');

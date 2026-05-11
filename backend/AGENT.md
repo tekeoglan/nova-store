@@ -48,8 +48,21 @@ backend/
 
 #### Public Product Endpoints
 Product endpoints are publicly accessible (no authentication required):
-- `GET /api/products` - List all products, optional query: `?category=CategoryName`
+- `GET /api/products` - List all products with optional query parameters
 - `GET /api/products/:id` - Get single product with category and related products
+
+**Query Parameters:**
+| Parameter | Type | Description | Example |
+|-----------|------|--------------|---------|
+| `category` | string | Filter by category name (Turkish: Elektronik, Giyim, Ev ve Yaşam, Kozmetik, Kitap) | `?category=Elektronik` |
+| `minPrice` | number | Filter products with price >= minPrice | `?minPrice=500` |
+| `maxPrice` | number | Filter products with price <= maxPrice | `?maxPrice=2000` |
+| `search` | string | Search products by name (partial match) | `?search=telefon` |
+
+**Combined Example:**
+```
+GET /api/products?category=Elektronik&minPrice=500&maxPrice=10000&search=telefon
+```
 
 **Product Response Shape:**
 ```json
