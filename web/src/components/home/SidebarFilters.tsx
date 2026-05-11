@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import { useFilterStore } from '@/store/filterStore';
 
 export const SidebarFilters = () => {
-  const { category, setCategory, priceRange, setPriceRange, resetFilters } = useFilterStore();
+  const { category, setCategory, priceRange, setPriceRange, searchQuery, resetFilters } = useFilterStore();
 
   const categories = ['All', 'Elektronik', 'Giyim', 'Ev ve Yaşam', 'Kozmetik', 'Kitap'];
   const priceRanges = [
@@ -16,15 +16,19 @@ export const SidebarFilters = () => {
     { id: '10000+', label: 'Over 10000' },
   ];
 
+  const hasActiveFilters = category !== 'All' || priceRange !== 'all' || searchQuery !== '';
+
   return (
     <div className="w-full md:w-64 space-y-6">
-      <button
-        onClick={resetFilters}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-text-secondary border border-outline hover:bg-surface-muted hover:text-on-surface rounded-lg transition-colors mb-4"
-      >
-        <X size={16} />
-        Clear All Filters
-      </button>
+      {hasActiveFilters && (
+        <button
+          onClick={resetFilters}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-text-secondary border border-outline hover:bg-surface-muted hover:text-on-surface rounded-lg transition-colors mb-4"
+        >
+          <X size={16} />
+          Clear All Filters
+        </button>
+      )}
 
       <div className="bg-white rounded-xl border border-surface-container-low p-6">
         <h3 className="text-body-md font-bold text-on-surface mb-4">Categories</h3>

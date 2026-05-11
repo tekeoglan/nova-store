@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, User } from 'lucide-react';
@@ -10,18 +10,43 @@ import { useFilterStore } from '@/store/filterStore';
 export const Navbar = () => {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [localSearch, setLocalSearch] = useState('');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const totalItems = useCartStore((state) => state.totalItems());
   const { searchQuery, setSearchQuery, resetFilters } = useFilterStore();
+  const debounceTimeMS = 1000
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      if (localSearch !== searchQuery) {
+        if (localSearch.trim()) {
+          resetFilters();
+          setSearchQuery(localSearch.trim());
+        } else if (searchQuery) {
+          setSearchQuery('');
+        }
+      }
+    }, debounceTimeMS);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [localSearch]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
+    if (localSearch.trim()) {
       resetFilters();
-      setSearchQuery(searchQuery.trim());
+      setSearchQuery(localSearch.trim());
     } else {
       setSearchQuery('');
     }
@@ -42,8 +67,13 @@ export const Navbar = () => {
           />
           <input
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch(e);
+              }
+            }}
             placeholder="Search products..."
             className="w-full pl-10 pr-4 py-2 bg-surface-muted rounded-full border border-transparent focus:outline-none focus:bg-white focus:border-primary transition-all text-on-surface"
           />
