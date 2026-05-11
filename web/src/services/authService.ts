@@ -7,28 +7,33 @@ const api = axios.create({
   },
 });
 
-// Interceptor to add auth token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth-storage')
-    ? JSON.parse(localStorage.getItem('auth-storage') || '{}').state.token
-    : null;
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const authStorage = localStorage.getItem('auth-storage');
+  if (authStorage) {
+    const { state } = JSON.parse(authStorage);
+    if (state?.staffAuth?.token) {
+      config.headers.Authorization = `Bearer ${state.staffAuth.token}`;
+    } else if (state?.userAuth?.token) {
+      config.headers.Authorization = `Bearer ${state.userAuth.token}`;
+    }
   }
   return config;
 });
 
 export const authService = {
-  async login(credentials: any) {
+  async login(credentials: { username: string; password: string }) {
     const response = await api.post('/auth/login', credentials);
+    return response.data;
+  },
+  async staffLogin(credentials: { email: string; password: string }) {
+    const response = await api.post('/staff/login', credentials);
     return response.data;
   },
   async forgotPassword(email: string) {
     const response = await api.post('/auth/forgot-password', { email });
     return response.data;
   },
-  async signup(userData: any) {
+  async signup(userData: { username: string; password: string; fullName: string; email: string }) {
     const response = await api.post('/auth/signup', userData);
     return response.data;
   },
