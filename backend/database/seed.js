@@ -10,6 +10,13 @@ const bcrypt = require('bcryptjs');
 
 async function seed() {
   try {
+    const existing = await Staff.findOne({ where: { Email: 'admin@novastore.com' } })
+
+    if (existing) {
+      console.log('Admin already exists, skipping the seed process.')
+      return
+    }
+
     const categoriesData = [
       { CategoryName: 'Elektronik' },
       { CategoryName: 'Giyim' },
@@ -21,18 +28,18 @@ async function seed() {
     console.log('Categories seeded.');
 
     const productsData = [
-      { ProductName: 'Akıllı Telefon', Price: 15000, Stock: 15, CategoryID: categories[0].CategoryID },
-      { ProductName: 'Laptop', Price: 25000, Stock: 5, CategoryID: categories[0].CategoryID },
-      { ProductName: 'Kulaklık', Price: 1200, Stock: 25, CategoryID: categories[0].CategoryID },
-      { ProductName: 'T-Shirt', Price: 400, Stock: 50, CategoryID: categories[1].CategoryID },
-      { ProductName: 'Jean Pantolon', Price: 800, Stock: 30, CategoryID: categories[1].CategoryID },
-      { ProductName: 'Roman', Price: 150, Stock: 100, CategoryID: categories[2].CategoryID },
-      { ProductName: 'Yazılım Kitabı', Price: 300, Stock: 10, CategoryID: categories[2].CategoryID },
-      { ProductName: 'Ruj', Price: 200, Stock: 40, CategoryID: categories[3].CategoryID },
-      { ProductName: 'Parfüm', Price: 1100, Stock: 12, CategoryID: categories[3].CategoryID },
-      { ProductName: 'Koltuk', Price: 5000, Stock: 8, CategoryID: categories[4].CategoryID },
-      { ProductName: 'Lamba', Price: 600, Stock: 22, CategoryID: categories[4].CategoryID },
-      { ProductName: 'Halı', Price: 2000, Stock: 18, CategoryID: categories[4].CategoryID },
+      { ProductName: 'Akıllı Telefon', Price: 15000, Stock: 15, CategoryID: categories[0].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400', Rating: 4.5, ReviewCount: 120, OldPrice: 17500, IsSale: true },
+      { ProductName: 'Laptop', Price: 25000, Stock: 5, CategoryID: categories[0].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400', Rating: 4.7, ReviewCount: 85, OldPrice: null, IsSale: false },
+      { ProductName: 'Kulaklık', Price: 1200, Stock: 25, CategoryID: categories[0].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', Rating: 4.3, ReviewCount: 200, OldPrice: 1500, IsSale: true },
+      { ProductName: 'T-Shirt', Price: 400, Stock: 50, CategoryID: categories[1].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400', Rating: 4.1, ReviewCount: 75, OldPrice: 500, IsSale: true },
+      { ProductName: 'Jean Pantolon', Price: 800, Stock: 30, CategoryID: categories[1].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400', Rating: 4.4, ReviewCount: 60, OldPrice: null, IsSale: false },
+      { ProductName: 'Roman', Price: 150, Stock: 100, CategoryID: categories[2].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400', Rating: 4.8, ReviewCount: 300, OldPrice: null, IsSale: false },
+      { ProductName: 'Yazılım Kitabı', Price: 300, Stock: 10, CategoryID: categories[2].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400', Rating: 4.6, ReviewCount: 45, OldPrice: 350, IsSale: true },
+      { ProductName: 'Ruj', Price: 200, Stock: 40, CategoryID: categories[3].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400', Rating: 4.2, ReviewCount: 90, OldPrice: null, IsSale: false },
+      { ProductName: 'Parfüm', Price: 1100, Stock: 12, CategoryID: categories[3].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400', Rating: 4.5, ReviewCount: 150, OldPrice: 1300, IsSale: true },
+      { ProductName: 'Koltuk', Price: 5000, Stock: 8, CategoryID: categories[4].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400', Rating: 4.6, ReviewCount: 40, OldPrice: null, IsSale: false },
+      { ProductName: 'Lamba', Price: 600, Stock: 22, CategoryID: categories[4].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400', Rating: 4.3, ReviewCount: 55, OldPrice: 750, IsSale: true },
+      { ProductName: 'Halı', Price: 2000, Stock: 18, CategoryID: categories[4].CategoryID, ImageURL: 'https://images.unsplash.com/photo-1600166898405-da671f2d1c4a?w=400', Rating: 4.4, ReviewCount: 30, OldPrice: null, IsSale: false },
     ];
     const products = await Product.bulkCreate(productsData);
     console.log('Products seeded.');

@@ -16,6 +16,7 @@ require('./models/Order');
 require('./models/OrderDetail');
 require('./models/User');
 require('./models/Staff');
+const productRoutes = require('./routes/products');
 
 const PORT = appConfig.port;
 
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/staff', staffAuthRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/products', productRoutes);
 
 // Ana sayfa
 app.get('/', (req, res) => {

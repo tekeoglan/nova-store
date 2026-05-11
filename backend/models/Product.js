@@ -27,6 +27,26 @@ const Product = sequelize.define('Product', {
       key: 'CategoryID',
     },
   },
+  ImageURL: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+  },
+  Rating: {
+    type: DataTypes.DECIMAL(3, 2),
+    defaultValue: 0,
+  },
+  ReviewCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  OldPrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
+  IsSale: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 }, {
   tableName: 'Products',
   timestamps: false,

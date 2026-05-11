@@ -28,6 +28,8 @@ web/src/
 │   ├── layout/        # Global layout components (Navbar, Footer)
 │   └── [feature]/     # Feature-specific components
 ├── services/          # API service layers and Axios configurations
+│   ├── authService.ts  # Auth endpoints and axios instance
+│   └── productService.ts # Product listing and details
 ├── store/             # Zustand store definitions
 └── data/              # Mock data and constants
 ```
@@ -57,9 +59,25 @@ web/src/
 - **API Token Handling:** The Axios interceptor automatically picks up `staffAuth.token` or `userAuth.token` from localStorage.
 
 ### 3. API Communication
-- Use the `authService` or create new services in `src/services/` for API calls.
-- Use the configured Axios instance to ensure base URLs and auth headers are handled automatically.
-- Always handle loading and error states in the UI.
+- Use `authService` for authentication endpoints (login, signup, etc.)
+- Use `productService` for product-related API calls (`getProducts`, `getProductById`)
+- Import the axios instance from `authService.ts` for other API needs
+- Use the configured Axios instance to ensure base URLs and auth headers are handled automatically
+- Always handle loading and error states in the UI
+
+**Product Service Usage:**
+```typescript
+import { productService, Product, ProductDetail } from '@/services/productService';
+
+// List products
+const products = await productService.getProducts();
+
+// Filter by category
+const products = await productService.getProducts('Electronics');
+
+// Get single product
+const product = await productService.getProductById('1');
+```
 
 ### 4. Navigation & Routing
 - Use `next/link` for internal navigation.

@@ -1,20 +1,101 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Heart, Star, Truck, ShieldCheck, Plus, Minus, Search, Play } from 'lucide-react';
-import { MOCK_PRODUCT_DETAILS } from '@/data/mockProducts';
+import { productService, ProductDetail } from '@/services/productService';
 import { useCartStore } from '@/store/cartStore';
-import { ProductCard } from '@/components/products/ProductCard';
 
 export default function ProductDetailPage() {
-  const product = MOCK_PRODUCT_DETAILS;
+  const params = useParams();
+  const productId = params.id as string;
+  
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(product.colors[0].value);
+  const [selectedColor, setSelectedColor] = useState('#1a1a1a');
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await productService.getProductById(productId);
+        setProduct(data);
+        if (data.colors.length > 0) {
+          setSelectedColor(data.colors[0].value);
+        }
+        setError(null);
+      } catch (err) {
+        setError('Failed to load product');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-surface">
+        <Navbar />
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
+          <div className="animate-pulse space-y-8">
+            <div className="h-4 w-48 bg-gray-200 rounded" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="aspect-square bg-gray-200 rounded-xl" />
+              <div className="space-y-4">
+                <div className="h-8 w-3/4 bg-gray-200 rounded" />
+                <div className="h-4 w-1/4 bg-gray-200 rounded" />
+                <div className="h-8 w-1/3 bg-gray-200 rounded" />
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex flex-col bg-surface">
+        <Navbar />
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-headline-md font-bold text-on-surface mb-2">Product Not Found</h2>
+            <p className="text-text-secondary mb-4">{error || 'The product you are looking for does not exist.'}</p>
+            <Button variant="primary" onClick={() => window.location.href = '/products'}>
+              Back to Products
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const cartItem = {
+    id: product.id,
+    name: product.name,
+    category: product.category,
+    price: product.price,
+    oldPrice: product.oldPrice,
+    rating: product.rating,
+    reviews: product.reviews,
+    image: product.image,
+    isSale: product.isSale,
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -38,7 +119,7 @@ export default function ProductDetailPage() {
           <div className="space-y-4">
             <div className="relative aspect-square rounded-xl overflow-hidden bg-surface-muted group">
               <img 
-                src={product.images[activeImage]} 
+                src={product.images[activeImage] || product.image} 
                 alt={product.name} 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
               />
@@ -56,9 +137,11 @@ export default function ProductDetailPage() {
                   <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
-              <button className="aspect-square rounded-lg border-2 border-outline-variant flex items-center justify-center bg-surface-muted text-outline hover:text-primary transition-colors">
-                <Play size={24} />
-              </button>
+              {product.images.length < 4 && (
+                <button className="aspect-square rounded-lg border-2 border-outline-variant flex items-center justify-center bg-surface-muted text-outline hover:text-primary transition-colors">
+                  <Play size={24} />
+                </button>
+              )}
             </div>
           </div>
 
@@ -82,12 +165,14 @@ export default function ProductDetailPage() {
 
             <div className="flex items-baseline gap-3 mb-2">
               <span className="text-headline-md font-bold text-on-surface">${product.price.toFixed(2)}</span>
-              <span className="text-body-sm text-text-secondary line-through">${product.oldPrice?.toFixed(2)}</span>
+              {product.oldPrice && (
+                <span className="text-body-sm text-text-secondary line-through">${product.oldPrice.toFixed(2)}</span>
+              )}
             </div>
 
             <div className="flex items-center gap-2 text-status-success text-sm font-medium mb-6">
               <ShieldCheck size={16} />
-              {product.stockStatus}
+              In Stock & Ready to Ship
             </div>
 
             <p className="text-body-md text-text-secondary mb-8 leading-relaxed">
@@ -130,7 +215,7 @@ export default function ProductDetailPage() {
               <Button 
                 variant="primary" 
                 className="flex-1 py-3 text-base gap-2"
-                onClick={() => addItem({ ...product, quantity })}
+                onClick={() => addItem({ ...cartItem, quantity })}
               >
                 Add to Cart
               </Button>
@@ -154,7 +239,7 @@ export default function ProductDetailPage() {
         {/* Bottom Section: Why You'll Love It & Specs */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           <div className="space-y-8">
-            <h2 className="text-headline-md font-bold text-on-surface">Why You'll Love It</h2>
+            <h2 className="text-headline-md font-bold text-on-surface">Why You&apos;ll Love It</h2>
             <div className="space-y-6">
               {product.features.map((feature, idx) => (
                 <div key={idx} className="flex gap-4">
@@ -176,7 +261,7 @@ export default function ProductDetailPage() {
               {Object.entries(product.specs).map(([key, value]) => (
                 <div key={key} className="flex justify-between items-center py-2 border-b border-outline-variant last:border-0">
                   <span className="text-sm text-text-secondary">{key}</span>
-                  <span className="text-sm font-medium text-on-surface">{value as string}</span>
+                  <span className="text-sm font-medium text-on-surface">{value}</span>
                 </div>
               ))}
             </div>

@@ -32,8 +32,9 @@ backend/
 │   └── Staff.js         # Staff authentication model (admin/moderator roles)
 ├── routes/
 │   ├── auth.js          # User registration and login endpoints
-│   ├── staffAuth.js    # Staff login endpoint
-│   └── reports.js      # Admin-only analytical report endpoints
+│   ├── staffAuth.js     # Staff login endpoint
+│   ├── products.js      # Public product listing endpoints
+│   └── reports.js       # Admin-only analytical report endpoints
 ├── tests/
 │   ├── test-auth.js     # User auth integration tests
 │   ├── test-api.js      # Report endpoint tests
@@ -44,6 +45,27 @@ backend/
 ## Key Implementation Details
 
 ### 1. Authentication Flow
+
+#### Public Product Endpoints
+Product endpoints are publicly accessible (no authentication required):
+- `GET /api/products` - List all products, optional query: `?category=CategoryName`
+- `GET /api/products/:id` - Get single product with category and related products
+
+**Product Response Shape:**
+```json
+{
+  "id": "1",
+  "name": "Product Name",
+  "category": "Category Name",
+  "price": 299.00,
+  "oldPrice": 349.00,
+  "rating": 4.5,
+  "reviews": 120,
+  "image": "https://...",
+  "isSale": true
+}
+```
+
 #### User Authentication
 - **Registration:** `POST /api/auth/signup` $\rightarrow$ Accepts `{username, password, fullName, email}` $\rightarrow$ Creates `Customer` and `User` in a transaction $\rightarrow$ User references Customer via `CustomerID` foreign key.
 - **Login:** `POST /api/auth/login` $\rightarrow$ Verifies hash against `PasswordHash` $\rightarrow$ Issues JWT.
