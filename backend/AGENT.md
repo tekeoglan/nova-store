@@ -20,44 +20,62 @@ backend/
 ├── database/
 │   └── seed.js          # Database initialization and dummy data population
 ├── middleware/
-│   └── authMiddleware.js # JWT verification and request protection
+│   ├── authMiddleware.js      # JWT verification for user authentication
+│   └── staffAuthMiddleware.js # JWT verification and role check for staff
 ├── models/              # Sequelize model definitions (mapped to SQLite tables)
 │   ├── Category.js
 │   ├── Product.js
 │   ├── Customer.js      # Customer profile data
 │   ├── Order.js
 │   ├── OrderDetail.js
-│   └── User.js          # Authentication model (references Customer)
+│   ├── User.js          # User authentication model (references Customer)
+│   └── Staff.js         # Staff authentication model (admin/moderator roles)
 ├── routes/
-│   ├── auth.js          # Registration and Login endpoints
-│   └── reports.js       # Protected analytical report endpoints
+│   ├── auth.js          # User registration and login endpoints
+│   ├── staffAuth.js    # Staff login endpoint
+│   └── reports.js      # Admin-only analytical report endpoints
 ├── tests/
-│   ├── test-auth.js     # Auth integration tests
-│   └── test-api.js      # Report endpoint tests
+│   ├── test-auth.js     # User auth integration tests
+│   ├── test-api.js      # Report endpoint tests
+│   └── run-staff-test.js # Staff auth and RBAC tests
 └── server.js            # App entry point and server configuration
 ```
 
 ## Key Implementation Details
 
 ### 1. Authentication Flow
+#### User Authentication
 - **Registration:** `POST /api/auth/signup` $\rightarrow$ Accepts `{username, password, fullName, email}` $\rightarrow$ Creates `Customer` and `User` in a transaction $\rightarrow$ User references Customer via `CustomerID` foreign key.
 - **Login:** `POST /api/auth/login` $\rightarrow$ Verifies hash against `PasswordHash` $\rightarrow$ Issues JWT.
-- **Protection:** Reports routes are wrapped in `authMiddleware`. Requests must include `Authorization: Bearer <token>`.
 
-### 2. Reporting Logic
+#### Staff Authentication
+- **Login:** `POST /api/staff/login` $\rightarrow$ Accepts `{email, password}` $\rightarrow$ Verifies against `Staff` model $\rightarrow$ Issues JWT with `type: 'staff'` and `role: 'admin'|'moderator'`.
+
+### 2. Authorization Flow
+- **Reports Protection:** `/api/reports` routes are secured with `staffAuth` middleware (verifies staff token) and `isAdmin` middleware (verifies `role === 'admin'`).
+- **User Space:** Regular users authenticated via `authMiddleware` cannot access staff routes.
+- **Admin Space:** Staff members with `admin` role can access reports. Other roles (e.g., `moderator`) are blocked with `403 Forbidden`.
+
+### 3. Reporting Logic
 The `/api/reports` endpoints implement complex SQL logic via Sequelize:
 - **Joins:** Used for mapping customers to orders and orders to products.
 - **Aggregations:** `SUM` for revenue and `COUNT` for category statistics.
 - **SQLite Specifics:** Date differences are calculated using `julianday` functions via `sequelize.literal`.
 
-### 3. Database Lifecycle
+### 4. Database Lifecycle
 - **Sync:** The server calls `sequelize.sync()` on startup.
-- **Seeding:** Run `node seeders/seed.js` to wipe the database and populate it with the required training data.
+- **Seeding:** Run `node server.js` in development mode to auto-seed data (Categories, Products, Customers, Orders, Users, and Staff).
+
+### 5. Default Staff Accounts (Seeded)
+| Email | Password | Role |
+|-------|----------|------|
+| admin@novastore.com | admin123 | admin |
+| mod@novastore.com | mod123 | moderator |
 
 ## Development Commands
 - **Start Server:** `node server.js`
 - **Populate Data:** Run `node server.js` in development mode (auto-seeds on startup)
-- **Run Tests:** `node tests/test-auth.js` (Auth flow) or `node tests/test-api.js` (Report flow).
+- **Run Tests:** `node tests/test-auth.js` (User auth flow) or `node tests/run-staff-test.js` (Staff auth and RBAC).
 
 ## Constraints & Guidelines
 - **Security:** Do not log plain-text passwords.
