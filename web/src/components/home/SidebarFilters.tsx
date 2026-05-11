@@ -6,7 +6,7 @@ import { useFilterStore } from '@/store/filterStore';
 export const SidebarFilters = () => {
   const { category, setCategory, priceRange, setPriceRange } = useFilterStore();
 
-  const categories = ['Electronics', 'Fashion', 'Home & Living', 'Accessories'];
+  const categories = ['All', 'Elektronik', 'Giyim', 'Ev ve Yaşam', 'Kozmetik', 'Kitap'];
   const priceRanges = [
     { id: 'under-50', label: 'Under $50' },
     { id: '50-200', label: '$50 - $200' },

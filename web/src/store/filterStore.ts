@@ -11,11 +11,11 @@ interface FilterState {
 }
 
 export const useFilterStore = create<FilterState>((set) => ({
-  category: 'Electronics',
-  priceRange: '50-200',
+  category: 'All',
+  priceRange: 'all',
   sortBy: 'Recommended',
   setCategory: (category) => set({ category }),
   setPriceRange: (priceRange) => set({ priceRange }),
   setSortBy: (sortBy) => set({ sortBy }),
-  resetFilters: () => set({ category: 'Electronics', priceRange: 'all', sortBy: 'Recommended' }),
+  resetFilters: () => set({ category: 'All', priceRange: 'all', sortBy: 'Recommended' }),
 }));

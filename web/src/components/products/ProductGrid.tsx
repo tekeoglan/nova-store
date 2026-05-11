@@ -7,7 +7,7 @@ import { useFilterStore } from '@/store/filterStore';
 import { productService, Product } from '@/services/productService';
 
 export const ProductGrid = () => {
-  const { sortBy, setSortBy } = useFilterStore();
+  const { category, sortBy, setSortBy } = useFilterStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export const ProductGrid = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const data = await productService.getProducts();
+        const data = await productService.getProducts(category === 'All' ? undefined : category);
         setProducts(data);
         setError(null);
       } catch (err) {
@@ -28,7 +28,7 @@ export const ProductGrid = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [category]);
 
   const sortedProducts = React.useMemo(() => {
     const productsCopy = [...products];
