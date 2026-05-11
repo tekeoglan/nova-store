@@ -1,22 +1,34 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 import { useFilterStore } from '@/store/filterStore';
 import { productService, Product } from '@/services/productService';
 
 export const ProductGrid = () => {
-  const { category, sortBy, setSortBy } = useFilterStore();
+  const { category, priceRange, sortBy, setSortBy, getPriceParams, searchQuery, resetFilters } = useFilterStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const prevSearchQuery = useRef(searchQuery);
 
   useEffect(() => {
+    if (prevSearchQuery.current && !searchQuery) {
+      resetFilters();
+    }
+    prevSearchQuery.current = searchQuery;
+
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const data = await productService.getProducts(category === 'All' ? undefined : category);
+        const priceParams = getPriceParams();
+        const data = await productService.getProducts(
+          category === 'All' ? undefined : category,
+          priceParams.minPrice,
+          priceParams.maxPrice,
+          searchQuery || undefined
+        );
         setProducts(data);
         setError(null);
       } catch (err) {
@@ -28,7 +40,7 @@ export const ProductGrid = () => {
     };
 
     fetchProducts();
-  }, [category]);
+  }, [category, priceRange, searchQuery]);
 
   const sortedProducts = React.useMemo(() => {
     const productsCopy = [...products];

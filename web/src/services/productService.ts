@@ -23,8 +23,19 @@ export interface ProductDetail extends Product {
 }
 
 export const productService = {
-  async getProducts(category?: string): Promise<Product[]> {
-    const url = category ? `/products?category=${encodeURIComponent(category)}` : '/products';
+  async getProducts(
+    category?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    search?: string
+  ): Promise<Product[]> {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (category) params.append('category', category);
+    if (minPrice !== undefined) params.append('minPrice', minPrice.toString());
+    if (maxPrice !== undefined) params.append('maxPrice', maxPrice.toString());
+    
+    const url = params.toString() ? `/products?${params.toString()}` : '/products';
     const response = await api.get(url);
     return response.data;
   },

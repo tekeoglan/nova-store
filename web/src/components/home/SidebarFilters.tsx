@@ -1,20 +1,31 @@
 'use client';
 
 import React from 'react';
+import { X } from 'lucide-react';
 import { useFilterStore } from '@/store/filterStore';
 
 export const SidebarFilters = () => {
-  const { category, setCategory, priceRange, setPriceRange } = useFilterStore();
+  const { category, setCategory, priceRange, setPriceRange, resetFilters } = useFilterStore();
 
   const categories = ['All', 'Elektronik', 'Giyim', 'Ev ve Yaşam', 'Kozmetik', 'Kitap'];
   const priceRanges = [
-    { id: 'under-50', label: 'Under $50' },
-    { id: '50-200', label: '$50 - $200' },
-    { id: 'over-200', label: 'Over $200' },
+    { id: 'all', label: 'All Prices' },
+    { id: '0-500', label: 'Under 500' },
+    { id: '500-2000', label: '500 - 2000' },
+    { id: '2000-10000', label: '2000 - 10000' },
+    { id: '10000+', label: 'Over 10000' },
   ];
 
   return (
     <div className="w-full md:w-64 space-y-6">
+      <button
+        onClick={resetFilters}
+        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-text-secondary border border-outline hover:bg-surface-muted hover:text-on-surface rounded-lg transition-colors mb-4"
+      >
+        <X size={16} />
+        Clear All Filters
+      </button>
+
       <div className="bg-white rounded-xl border border-surface-container-low p-6">
         <h3 className="text-body-md font-bold text-on-surface mb-4">Categories</h3>
         <div className="flex flex-col gap-1">

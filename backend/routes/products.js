@@ -6,14 +6,24 @@ const Category = require('../models/Category');
 
 router.get('/', async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, minPrice, maxPrice, search } = req.query;
     
     const whereClause = {};
+    if (search) {
+      whereClause.ProductName = { [Op.like]: `%${search}%` };
+    }
     if (category) {
       const cat = await Category.findOne({ where: { CategoryName: { [Op.like]: `%${category}%` } } });
       if (cat) {
         whereClause.CategoryID = cat.CategoryID;
       }
+    }
+
+    if (minPrice) {
+      whereClause.Price = { ...whereClause.Price, [Op.gte]: parseFloat(minPrice) };
+    }
+    if (maxPrice) {
+      whereClause.Price = { ...whereClause.Price, [Op.lte]: parseFloat(maxPrice) };
     }
 
     const products = await Product.findAll({

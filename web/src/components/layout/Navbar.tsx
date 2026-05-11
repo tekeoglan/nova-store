@@ -2,16 +2,31 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, User } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useFilterStore } from '@/store/filterStore';
 
 export const Navbar = () => {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const totalItems = useCartStore((state) => state.totalItems());
+  const { searchQuery, setSearchQuery, resetFilters } = useFilterStore();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      resetFilters();
+      setSearchQuery(searchQuery.trim());
+    } else {
+      setSearchQuery('');
+    }
+    router.push('/');
+  };
 
   return (
     <nav className="w-full bg-white border-b border-outline-variant px-4 py-3 flex items-center justify-between sticky top-0 z-50">
@@ -20,17 +35,19 @@ export const Navbar = () => {
           NovaStore
         </Link>
 
-        <div className="flex-1 max-w-2xl relative group">
+        <form onSubmit={handleSearch} className="flex-1 max-w-2xl relative group">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors"
             size={18}
           />
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search products..."
             className="w-full pl-10 pr-4 py-2 bg-surface-muted rounded-full border border-transparent focus:outline-none focus:bg-white focus:border-primary transition-all text-on-surface"
           />
-        </div>
+        </form>
 
         <div className="flex items-center gap-6">
           <Link href="/cart" className="relative p-2 text-on-surface hover:text-primary transition-colors">
