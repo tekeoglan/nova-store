@@ -17,7 +17,10 @@ This document provides guidance for AI agents working on the NovaStore frontend 
 ```
 web/src/
 ├── app/               # Next.js App Router (pages, layouts, route groups)
-│   ├── admin/         # Admin panel (protected routes)
+│   ├── admin/         # Admin panel (staff-only protected routes)
+│   │   ├── login/     # Staff login page
+│   │   ├── (dashboard)/  # Protected dashboard layout and routes
+│   │   └── components/    # Admin-specific components (Sidebar, ReportsTable, MetricCard)
 │   ├── products/      # Product catalog and details
 │   └── cart/          # Shopping cart flow
 ├── components/        # React components
@@ -40,6 +43,18 @@ web/src/
 - Use **Zustand** for global state (Auth, Cart, Filters).
 - Use local `useState` for component-specific UI state.
 - Keep stores lean and separate by concern (e.g., `authStore.ts`, `cartStore.ts`).
+- **Auth Store Pattern:** The auth store uses `AuthSession<T>` generic interface with two separate sessions:
+  - `userAuth`: Regular user authentication (from `/api/auth/login`)
+  - `staffAuth`: Staff authentication (from `/api/staff/login`)
+- **Auth Session Usage:**
+  ```typescript
+  const { userAuth, staffAuth } = useAuthStore();
+  // Check auth: staffAuth.isAuthenticated
+  // Access user: staffAuth.user (contains role, email, id)
+  // Set auth: staffAuth.setAuth(user, token)
+  // Logout: staffAuth.logout()
+  ```
+- **API Token Handling:** The Axios interceptor automatically picks up `staffAuth.token` or `userAuth.token` from localStorage.
 
 ### 3. API Communication
 - Use the `authService` or create new services in `src/services/` for API calls.
@@ -50,6 +65,13 @@ web/src/
 - Use `next/link` for internal navigation.
 - Use `useRouter` from `next/navigation` for programmatic redirects.
 - Use route groups (e.g., `(dashboard)`) to organize layouts without affecting the URL structure.
+
+### 5. Admin Panel (Staff Space)
+- **Separation:** Admin panel (`/admin`) uses separate authentication from regular users.
+- **Login:** Staff login at `/admin/login` calls `POST /api/staff/login` with `{email, password}`.
+- **Protection:** `AdminLayout` checks `staffAuth.isAuthenticated`. Non-staff users are redirected to `/admin/login`.
+- **RBAC:** Backend enforces `role === 'admin'` for all `/api/reports/*` endpoints.
+- **Reports:** All report pages handle `401` (redirect to login) and `403` (access denied) errors gracefully.
 
 ## Quality Assurance
 
