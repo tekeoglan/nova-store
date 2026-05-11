@@ -4,6 +4,7 @@ const cors = require('cors');
 const sequelize = require('./config/database');
 const reportRoutes = require('./routes/reports');
 const authRoutes = require('./routes/auth');
+const staffAuthRoutes = require('./routes/staffAuth');
 const appConfig = require('./config/app')
 const seed = require('./database/seed')
 
@@ -14,6 +15,7 @@ require('./models/Customer');
 require('./models/Order');
 require('./models/OrderDetail');
 require('./models/User');
+require('./models/Staff');
 
 const PORT = appConfig.port;
 
@@ -24,11 +26,12 @@ app.use(express.json());
 
 // Rotaları ekle
 app.use('/api/auth', authRoutes);
+app.use('/api/staff', staffAuthRoutes);
 app.use('/api/reports', reportRoutes);
 
 // Ana sayfa
 app.get('/', (req, res) => {
-  res.send('NovaStore Backend API is running. Use /api/auth for auth and /api/reports for reports.');
+  res.send('NovaStore Backend API is running. Use /api/auth for auth, /api/staff for staff auth, and /api/reports for reports.');
 });
 
 async function startServer() {

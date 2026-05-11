@@ -2,15 +2,16 @@ const express = require('express');
 const router = express.Router();
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
-const { authMiddleware } = require('../middleware/authMiddleware');
+const { staffAuth, isAdmin } = require('../middleware/staffAuthMiddleware');
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const OrderDetail = require('../models/OrderDetail');
 
-// Tüm rapor rotaları kimlik doğrulama gerektirir
-router.use(authMiddleware);
+// Tüm rapor rotaları staff kimlik doğrulama gerektirir
+router.use(staffAuth);
+router.use(isAdmin);
 
 // 1. Stok miktarı 20'den az olan ürünler (Azalan sırada)
 router.get('/low-stock', async (req, res) => {
