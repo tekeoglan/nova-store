@@ -15,19 +15,19 @@ export const Navbar = () => {
 
   return (
     <nav className="w-full bg-white border-b border-outline-variant px-4 py-3 flex items-center justify-between sticky top-0 z-50">
-      <div className="flex items-center gap-8 w-full max-w-7xl mx-auto">
+      <div className="flex items-center justify-between w-full max-w-7xl mx-auto">
         <Link href="/" className="text-headline-md font-bold text-primary">
           NovaStore
         </Link>
 
         <div className="flex-1 max-w-2xl relative group">
-          <Search 
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors" 
-            size={18} 
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors"
+            size={18}
           />
-          <input 
-            type="text" 
-            placeholder="Search products..." 
+          <input
+            type="text"
+            placeholder="Search products..."
             className="w-full pl-10 pr-4 py-2 bg-surface-muted rounded-full border border-transparent focus:outline-none focus:bg-white focus:border-primary transition-all text-on-surface"
           />
         </div>
