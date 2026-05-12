@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/product.dart';
 
 class CartItem {
@@ -35,12 +37,47 @@ class CartItem {
       quantity: quantity,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'price': price,
+        'image': image,
+        'quantity': quantity,
+      };
+
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      image: json['image'] as String? ?? '',
+      quantity: json['quantity'] as int? ?? 1,
+    );
+  }
 }
 
 class CartNotifier extends StateNotifier<List<CartItem>> {
   CartNotifier() : super([]);
 
-  void addItem(CartItem item) {
+  Future<void> loadFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('cart_items');
+    if (data != null) {
+      final list = jsonDecode(data) as List<dynamic>;
+      state = list
+          .map((e) => CartItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+  }
+
+  Future<void> _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = jsonEncode(state.map((e) => e.toJson()).toList());
+    await prefs.setString('cart_items', data);
+  }
+
+  Future<void> addItem(CartItem item) async {
     final index = state.indexWhere((i) => i.id == item.id);
     if (index >= 0) {
       state = [
@@ -51,32 +88,39 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     } else {
       state = [...state, item];
     }
+    _save();
   }
 
-  void addProduct(Product product) {
-    addItem(CartItem.fromProduct(product));
+  Future<void> addProduct(Product product) async {
+    await addItem(CartItem.fromProduct(product));
   }
 
-  void removeItem(String id) {
+  Future<void> removeItem(String id) async {
     state = state.where((item) => item.id != id).toList();
+    _save();
   }
 
-  void updateQuantity(String id, int quantity) {
+  Future<void> updateQuantity(String id, int quantity) async {
     if (quantity < 1) return;
     state = [
       for (final item in state)
         if (item.id == id) item.copyWith(quantity: quantity)
         else item,
     ];
+    _save();
   }
 
-  void clearCart() => state = [];
+  Future<void> clearCart() async {
+    state = [];
+    _save();
+  }
 
   int totalItems() => state.fold(0, (sum, item) => sum + item.quantity);
   double totalPrice() =>
       state.fold(0.0, (sum, item) => sum + item.price * item.quantity);
 }
 
-final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) {
+final cartProvider =
+    StateNotifierProvider<CartNotifier, List<CartItem>>((ref) {
   return CartNotifier();
 });
