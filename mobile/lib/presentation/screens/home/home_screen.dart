@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
+import '../../providers/cart_provider.dart';
 import '../../providers/filter_provider.dart';
 import '../../widgets/hero_banner.dart';
 import '../../widgets/category_chips.dart';
@@ -14,6 +16,8 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.watch(filterProvider);
     final notifier = ref.read(filterProvider.notifier);
+    final cartItems = ref.watch(cartProvider);
+    final totalItems = cartItems.fold(0, (sum, item) => sum + item.quantity);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,8 +37,31 @@ class HomeScreen extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.shopping_cart_outlined),
                 color: AppColors.onSurface,
-                onPressed: () {},
+                onPressed: () => context.push('/cart'),
               ),
+              if (totalItems > 0)
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: AppColors.accentEnergy,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        totalItems.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
           IconButton(
