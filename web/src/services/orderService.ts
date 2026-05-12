@@ -22,4 +22,8 @@ export const orderService = {
     const response = await api.post('/orders', { items });
     return response.data;
   },
+  async getOrders(): Promise<OrderResponse[]> {
+    const response = await api.get('/orders');
+    return response.data;
+  },
 };

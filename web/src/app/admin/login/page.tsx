@@ -17,6 +17,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [redirecting, setRedirecting] = useState(false);
+  const staffAuth = useAuthStore((state) => state.staffAuth);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     defaultValues: {
@@ -26,11 +27,10 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (useAuthStore.getState().staffAuth.isAuthenticated) {
-      setRedirecting(true);
+    if (staffAuth.isAuthenticated) {
       router.push('/admin');
     }
-  }, [router]);
+  }, [staffAuth.isAuthenticated, router]);
 
   if (redirecting) {
     return null;
@@ -41,7 +41,11 @@ export default function LoginPage() {
     try {
       const response = await authService.staffLogin(data);
       const token = response.token;
-      useAuthStore.getState().staffAuth.setAuth({ id: '1', email: data.email, role: 'admin' }, token);
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      useAuthStore.getState().staffAuth.setAuth(
+        { id: String(payload.staffId), email: payload.email, role: payload.role },
+        token
+      );
       setRedirecting(true);
       router.push('/admin');
     } catch (err: unknown) {

@@ -34,6 +34,7 @@ backend/
 │   ├── auth.js          # User registration and login endpoints
 │   ├── staffAuth.js     # Staff login endpoint
 │   ├── products.js      # Public product listing endpoints
+│   ├── orders.js        # Order creation (requires user JWT)
 │   └── reports.js       # Admin-only analytical report endpoints
 ├── tests/
 │   ├── test-auth.js     # User auth integration tests
@@ -84,12 +85,17 @@ GET /api/products?category=Elektronik&minPrice=500&maxPrice=10000&search=telefon
 - **Login:** `POST /api/auth/login` $\rightarrow$ Verifies hash against `PasswordHash` $\rightarrow$ Issues JWT.
 
 #### Staff Authentication
-- **Login:** `POST /api/staff/login` $\rightarrow$ Accepts `{email, password}` $\rightarrow$ Verifies against `Staff` model $\rightarrow$ Issues JWT with `type: 'staff'` and `role: 'admin'|'moderator'`.
+- **Login:** `POST /api/staff/login` $\rightarrow$ Accepts `{email, password}$` $\rightarrow$ Verifies against `Staff` model $\rightarrow$ Issues JWT with `type: 'staff'` and `role: 'admin'|'moderator'`.
+
+#### Order Creation
+- **Create Order:** `POST /api/orders` $\rightarrow$ Requires valid user JWT in `Authorization` header. Accepts `{items: [{productId, quantity}]}` $\rightarrow$ Creates `Order` and `OrderDetail` rows, associating the order with the authenticated user's `CustomerID`.
 
 ### 2. Authorization Flow
-- **Reports Protection:** `/api/reports` routes are secured with `staffAuth` middleware (verifies staff token) and `isAdmin` middleware (verifies `role === 'admin'`).
+- **Reports Protection:** `/api/reports` routes are secured with `staffAuth` middleware (verifies staff token and `type === 'staff'`) and `isAdmin` middleware (verifies `role === 'admin'`).
+- **Order Protection:** `POST /api/orders` performs inline JWT verification, extracts `userId`, and looks up the associated `CustomerID` via the `User` model.
 - **User Space:** Regular users authenticated via `authMiddleware` cannot access staff routes.
 - **Admin Space:** Staff members with `admin` role can access reports. Other roles (e.g., `moderator`) are blocked with `403 Forbidden`.
+- **JWT Secret:** All JWT signing and verification uses `appConfig.jwtSecret` from `config/app.js` for consistency.
 
 ### 3. Reporting Logic
 The `/api/reports` endpoints implement complex SQL logic via Sequelize:

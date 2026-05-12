@@ -23,11 +23,6 @@ const PORT = appConfig.port;
 
 const app = express();
 
-if (appConfig.env == 'development') {
-  const errorHandler = require('errorhandler')
-  app.use(errorHandler)
-}
-
 app.use(cors({ origin: appConfig.webURL }));
 app.use(express.json());
 
@@ -37,6 +32,11 @@ app.use('/api/staff', staffAuthRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+
+if (appConfig.env === 'development') {
+  const errorhandler = require('errorhandler');
+  app.use(errorhandler());
+}
 
 // Ana sayfa
 app.get('/', (req, res) => {

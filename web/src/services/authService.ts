@@ -38,6 +38,10 @@ export const authService = {
     const response = await api.post('/auth/forgot-password', { email });
     return response.data;
   },
+  async getProfile() {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
   async signup(userData: { username: string; password: string; fullName: string; email: string }) {
     const response = await api.post('/auth/signup', userData);
     return response.data;

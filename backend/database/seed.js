@@ -56,7 +56,8 @@ async function seed() {
     console.log('Customers seeded.');
 
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    await User.create({ Username: 'admin', PasswordHash: hashedPassword });
+    const adminCustomer = await Customer.create({ FullName: 'Admin', Email: 'admin@novastore-user.com', City: 'İstanbul' });
+    await User.create({ Username: 'admin', PasswordHash: hashedPassword, CustomerID: adminCustomer.CustomerID });
     console.log('Admin user seeded.');
 
     const staffAdminHash = await bcrypt.hash('admin123', 10);

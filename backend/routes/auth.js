@@ -6,6 +6,7 @@ const sequelize = require('../config/database');
 const Customer = require('../models/Customer');
 const User = require('../models/User');
 const appConfig = require('../config/app');
+const { authMiddleware } = require('../middleware/authMiddleware');
 
 // Register
 router.post('/signup', async (req, res) => {
@@ -55,6 +56,31 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ userId: user.UserID, username: user.Username }, appConfig.jwtSecret, { expiresIn: '1h' });
 
     res.json({ message: 'Login successful', token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get current user profile
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.userId, {
+      include: [{ model: Customer }],
+      attributes: ['UserID', 'Username', 'CustomerID'],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      userId: user.UserID,
+      username: user.Username,
+      fullName: user.Customer?.FullName || user.Username,
+      email: user.Customer?.Email || '',
+      city: user.Customer?.City || null,
+      customerId: user.CustomerID,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

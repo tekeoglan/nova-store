@@ -21,16 +21,18 @@ web/src/
 │   │   ├── login/     # Staff login page
 │   │   ├── (dashboard)/  # Protected dashboard layout and routes
 │   │   └── components/    # Admin-specific components (Sidebar, ReportsTable, MetricCard)
+│   ├── login/         # User login page
 │   ├── products/      # Product catalog and details
-│   └── cart/          # Shopping cart flow
+│   └── cart/          # Shopping cart flow (with auth-gated checkout)
 ├── components/        # React components
 │   ├── ui/            # Basic atomic components (Button, Input, etc.)
 │   ├── layout/        # Global layout components (Navbar, Footer)
 │   ├── home/          # Home page components (SidebarFilters, Hero)
 │   └── products/      # Product components (ProductGrid, ProductCard)
 ├── services/          # API service layers and Axios configurations
-│   ├── authService.ts  # Auth endpoints and axios instance
-│   └── productService.ts # Product listing and details
+│   ├── authService.ts  # Auth endpoints and axios instance (with token-routing interceptor)
+│   ├── productService.ts # Product listing and details
+│   └── orderService.ts  # Order creation endpoint
 ├── store/             # Zustand store definitions (auth, cart, filter)
 └── data/              # Mock data and constants
 ```
@@ -57,7 +59,9 @@ web/src/
   // Set auth: staffAuth.setAuth(user, token)
   // Logout: staffAuth.logout()
   ```
-- **API Token Handling:** The Axios interceptor automatically picks up `staffAuth.token` or `userAuth.token` from localStorage.
+- **Admin Login JWT Decoding:** On successful staff login, the JWT payload is decoded with `atob(token.split('.')[1])` to extract `staffId`, `email`, and `role` instead of hardcoding values.
+- **Custom Persist Merge:** The store uses a custom `merge` function so persisted data (`user`, `token`, `isAuthenticated`) is deep-merged into the session objects, preserving `setAuth`/`logout` methods across rehydration.
+- **API Token Handling:** The Axios interceptor parses `config.url` with `new URL()` to extract the request pathname. Routes containing `/staff/` or `/reports/` use the staffAuth token; all other routes use the userAuth token.
 
 ### 4. Filter State Management
 - **Filter Store (`filterStore.ts`):** Manages product filtering state (category, price range, sort, search)
@@ -73,6 +77,7 @@ web/src/
 ### 3. API Communication
 - Use `authService` for authentication endpoints (login, signup, etc.)
 - Use `productService` for product-related API calls (`getProducts`, `getProductById`)
+- Use `orderService` for creating orders (checkout flow)
 - Import the axios instance from `authService.ts` for other API needs
 - Use the configured Axios instance to ensure base URLs and auth headers are handled automatically
 - Always handle loading and error states in the UI
@@ -95,6 +100,17 @@ const products = await productService.getProducts(undefined, undefined, undefine
 
 // Get single product
 const product = await productService.getProductById('1');
+```
+
+**Order Service Usage:**
+```typescript
+import { orderService } from '@/services/orderService';
+
+// Create an order (user must be authenticated)
+const order = await orderService.createOrder([
+  { productId: '1', quantity: 2 },
+  { productId: '3', quantity: 1 },
+]);
 ```
 
 ### 4. Navigation & Routing

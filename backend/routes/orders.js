@@ -7,6 +7,47 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 const appConfig = require('../config/app');
 
+// Get order history for authenticated user
+router.get('/', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, appConfig.jwtSecret);
+
+    const user = await User.findByPk(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const orders = await Order.findAll({
+      where: { CustomerID: user.CustomerID },
+      include: [
+        { model: OrderDetail, include: [Product] }
+      ],
+      order: [['OrderDate', 'DESC']],
+    });
+
+    res.json(orders.map(order => ({
+      orderId: order.OrderID,
+      totalAmount: order.TotalAmount,
+      orderDate: order.OrderDate,
+      items: order.OrderDetails.map(d => ({
+        productId: d.ProductID,
+        productName: d.Product ? d.Product.ProductName : '',
+        quantity: d.Quantity,
+        price: d.Product ? parseFloat(d.Product.Price) : 0,
+      })),
+    })));
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.post('/', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
