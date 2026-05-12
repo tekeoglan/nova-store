@@ -17,6 +17,7 @@ export default function CartPage() {
   const { userAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const SUBTOTAL = totalPrice();
   const SHIPPING = items.length > 0 ? 12.50 : 0;
@@ -39,13 +40,13 @@ export default function CartPage() {
       }));
 
       await orderService.createOrder(orderItems);
+      setSuccess(true);
+      clearCart();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to place order';
       setError(errorMessage);
     } finally {
       setLoading(false);
-      clearCart();
-      router.push('/');
     }
   };
 
@@ -54,6 +55,11 @@ export default function CartPage() {
       <div className="min-h-screen flex flex-col bg-surface">
         <Navbar />
         <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-24 flex flex-col items-center justify-center text-center">
+          {success && (
+            <div className="mb-6 w-full max-w-md p-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg text-center font-medium">
+              Order placed successfully! Thank you for your purchase.
+            </div>
+          )}
           <div className="w-24 h-24 bg-surface-muted rounded-full flex items-center justify-center text-outline mb-6">
             <ShoppingBag size={48} />
           </div>

@@ -76,6 +76,11 @@ router.post('/', async (req, res) => {
       if (!product) {
         return res.status(400).json({ message: `Product ${item.productId} not found` });
       }
+      if (product.Stock < item.quantity) {
+        return res.status(400).json({
+          message: `Insufficient stock for ${product.ProductName}. Available: ${product.Stock}, requested: ${item.quantity}`
+        });
+      }
       totalAmount += parseFloat(product.Price) * item.quantity;
       orderDetails.push({
         ProductID: parseInt(item.productId),
@@ -95,6 +100,7 @@ router.post('/', async (req, res) => {
         ProductID: detail.ProductID,
         Quantity: detail.Quantity,
       });
+      await Product.decrement('Stock', { by: detail.Quantity, where: { ProductID: detail.ProductID } });
     }
 
     const createdOrder = await Order.findByPk(order.OrderID, {

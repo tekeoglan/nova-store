@@ -26,17 +26,19 @@ export default function AdminDashboard() {
       try {
         // In a real app, we'd have a /api/reports/summary endpoint
         // For now, we'll fetch low-stock and other available data to simulate
-        const [lowStockRes, orderHistoryRes] = await Promise.all([
+        const [productsRes, lowStockRes, orderHistoryRes] = await Promise.all([
+          api.get('/products'),
           api.get('/reports/low-stock'),
           api.get('/reports/order-history')
         ]);
 
+        const products = productsRes.data;
         const lowStock = lowStockRes.data;
         const orders = orderHistoryRes.data;
         const totalRevenue = orders.reduce((acc: number, order: { TotalAmount: number }) => acc + (order.TotalAmount || 0), 0);
 
         setStats({
-          totalProducts: 120, // Mocked as no total-products API exists
+          totalProducts: products.length,
           totalOrders: orders.length,
           totalRevenue: totalRevenue,
           lowStockCount: lowStock.length,

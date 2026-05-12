@@ -52,7 +52,15 @@ export default function OrderHistoryPage() {
   }, [filters, orders]);
 
   const columns = [
-    { header: 'Sipariş Tarihi', accessor: 'OrderDate' },
+    { 
+      header: 'Sipariş Tarihi', 
+      accessor: 'OrderDate',
+      render: (val: string) => new Date(val).toLocaleDateString('tr-TR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    },
     { 
       header: 'Müşteri', 
       accessor: 'Customer', 
