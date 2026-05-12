@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants.dart';
 import '../../data/models/product.dart';
 import '../providers/cart_provider.dart';
@@ -13,14 +14,16 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceMain,
-        borderRadius: BorderRadius.circular(AppRadius.defaultRadius),
-        border: Border.all(color: AppColors.surfaceContainerLow),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
+    return GestureDetector(
+      onTap: () => context.push('/product/${product.id}'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceMain,
+          borderRadius: BorderRadius.circular(AppRadius.defaultRadius),
+          border: Border.all(color: AppColors.surfaceContainerLow),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Stack(
@@ -174,6 +177,7 @@ class ProductCard extends ConsumerWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

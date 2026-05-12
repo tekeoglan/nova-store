@@ -4,6 +4,7 @@ import '../presentation/screens/cart/cart_screen.dart';
 import '../presentation/screens/login/login_screen.dart';
 import '../presentation/screens/signup/signup_screen.dart';
 import '../presentation/screens/profile/profile_screen.dart';
+import '../presentation/screens/product/product_detail_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -27,6 +28,12 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
+    ),
+    GoRoute(
+      path: '/product/:id',
+      builder: (context, state) => ProductDetailScreen(
+        productId: state.pathParameters['id']!,
+      ),
     ),
   ],
 );
