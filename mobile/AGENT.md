@@ -29,20 +29,32 @@ mobile/lib/
 │   └── constants.dart                # Design tokens: AppColors, AppRadius, AppSpacing
 ├── data/
 │   ├── models/
-│   │   └── product.dart              # Product, ProductDetail, ColorOption, etc. with fromJson
+│   │   ├── product.dart              # Product, ProductDetail, ColorOption, etc. with fromJson
+│   │   └── order.dart                # OrderResponse, OrderItem, CreateOrderItem with fromJson
 │   ├── services/
-│   │   └── product_service.dart      # ProductService: getProducts(), getProductById()
+│   │   ├── product_service.dart      # ProductService: getProducts(), getProductById()
+│   │   └── order_service.dart        # OrderService: createOrder(), getOrders()
 │   └── repositories/
 │       └── product_repository.dart   # Thin wrapper around service, rethrows DioException
 └── presentation/
     ├── providers/
     │   ├── filter_provider.dart      # FilterNotifier: category, priceRange, sortBy, searchQuery
     │   │                             #   + productsProvider: auto-refetches on filter change
-    │   └── cart_provider.dart        # CartNotifier: items, addItem, removeItem, updateQuantity
+    │   ├── cart_provider.dart        # CartNotifier: items, addItem, removeItem, updateQuantity
+    │   │                             #   auto-persisted to SharedPreferences
+    │   └── auth_provider.dart        # AuthNotifier: login, signup, logout, token persist
     ├── screens/
-    │   └── home/
-    │       └── home_screen.dart      # CustomScrollView with HeroBanner, CategoryChips,
-    │                                 #   PriceRangeSelector, ProductGrid, search bar, sort
+    │   ├── home/
+    │   │   └── home_screen.dart      # CustomScrollView + cart badge in AppBar
+    │   ├── cart/
+    │   │   └── cart_screen.dart      # Item list, quantity steppers, order summary,
+    │   │                             #   checkout flow with auth gate + success view
+    │   ├── login/
+    │   │   └── login_screen.dart     # Username/password form, auto-pop on auth
+    │   ├── signup/
+    │   │   └── signup_screen.dart    # Full registration form with validation
+    │   └── profile/
+    │       └── profile_screen.dart   # User info card + order history + logout
     └── widgets/
         ├── hero_banner.dart          # Gradient overlay, "NEW ARRIVAL" badge, title, description,
         │                             #   "Shop Collection" button pinned to bottom
@@ -65,23 +77,32 @@ mobile/lib/
 ### 2. State Management (Riverpod)
 - **Filter state:** `filterProvider` — `StateNotifierProvider<FilterNotifier, FilterState>` with category, priceRange (enum), sortBy (enum), searchQuery.
 - **Products data:** `productsProvider` — `FutureProvider` that watches filterProvider and calls repository. Auto-refetches on filter change. Sorting is done client-side after fetch.
-- **Cart state:** `cartProvider` — `StateNotifierProvider<CartNotifier, List<CartItem>>` with add/remove/updateQuantity/totalItems/totalPrice.
+- **Cart state:** `cartProvider` — `StateNotifierProvider<CartNotifier, List<CartItem>>` with add/remove/updateQuantity/totalItems/totalPrice. Auto-persisted to `SharedPreferences` under `cart_items` key.
+- **Auth state:** `authProvider` — `StateNotifierProvider<AuthNotifier, AuthState>` with user, token, isAuthenticated, isLoading, error. Persisted to `SharedPreferences` under `auth_token` and `auth_user`.
 - **Reading providers:**
   ```dart
   final filter = ref.watch(filterProvider);                     // reactive rebuild
   final productsAsync = ref.watch(productsProvider);            // reactive rebuild
   final notifier = ref.read(cartProvider.notifier);             // one-time action
+  final auth = ref.watch(authProvider);                         // reactive rebuild
   ```
 - **Writing providers:**
   ```dart
   ref.read(filterProvider.notifier).setCategory('Elektronik');
   ref.read(cartProvider.notifier).addProduct(product);
+  ref.read(cartProvider.notifier).removeItem(id);
+  ref.read(cartProvider.notifier).updateQuantity(id, 3);
+  ref.read(cartProvider.notifier).clearCart();
+  ref.read(authProvider.notifier).login('username', 'password');
+  ref.read(authProvider.notifier).signup(username:, password:, fullName:, email:);
+  ref.read(authProvider.notifier).logout();
   ```
 
 ### 3. API Communication
-- Use `ApiClient.instance.dio` for HTTP calls (already configured in `product_service.dart`).
+- Use `ApiClient.instance.dio` for HTTP calls (already configured in `product_service.dart` and `order_service.dart`).
 - The base URL is set at startup via `--dart-define=BACKEND_URL=...` (default: `http://localhost:8080/api`).
 - For Android emulator, use `http://10.0.2.2:8080/api` (maps to host localhost).
+- **Auth interceptor:** `ApiClient` automatically attaches `Authorization: Bearer <token>` header to every request when a token is set via `ApiClient.instance.setAuthToken(token)`. This is called automatically on login and app startup.
 - Always handle loading/error states using `.when(loading:, error:, data:)` on `AsyncValue`.
 
 **Product Service Usage:**
@@ -94,6 +115,16 @@ final products = await service.getProducts(
   search: 'telefon',
 );
 final detail = await service.getProductById('1');
+```
+
+**Order Service Usage:**
+```dart
+final service = OrderService();
+final order = await service.createOrder([
+  CreateOrderItem(productId: '1', quantity: 2),
+  CreateOrderItem(productId: '3', quantity: 1),
+]);
+final orders = await service.getOrders(); // requires auth
 ```
 
 **Filter Enums:**
@@ -111,14 +142,26 @@ SortBy.values:    recommended | priceLowToHigh | priceHighToLow | popularity
 - Use `GoRouter` (defined in `app/router.dart`) for routing.
 - Push routes via `context.push('/product/$id')` or `context.go('/cart')`.
 - Keep route paths consistent with backend entity names.
+- Current routes: `/` (home), `/cart`, `/login`, `/signup`, `/profile`.
+- Cart button in the AppBar navigates to `/cart` — wired with a badge showing `totalItems()` count.
+- Profile icon in the AppBar navigates to `/profile`.
 
-### 6. Styling (Design System)
+### 6. Auth & Checkout Flow
+- **Login flow:** LoginScreen collects username/password → calls `authProvider.login()` → on success, `AuthNotifier` calls `POST /api/auth/login` + `GET /api/auth/me`, stores token + user in `SharedPreferences`, sets token on `ApiClient` interceptor → screen auto-pops back.
+- **Signup flow:** SignupScreen collects fullName/email/username/password → validates client-side → calls `authProvider.signup()` → `POST /api/auth/signup` + auto-login.
+- **Checkout flow:** CartScreen → "Proceed to Checkout" checks `auth.isAuthenticated` → if false, pushes `/login` → if true, calls `POST /api/orders` with `[{productId, quantity}]` → on success: `clearCart()` + shows success view → on error: shows error banner.
+- **Auto-restore:** On app startup, `_AppStartup` widget calls `tryAutoLogin()` and `loadFromPrefs()` to restore auth session and cart from `SharedPreferences`.
+- **Profile flow:** ProfileScreen checks `auth.isAuthenticated` → if false, redirects to `/login` → fetches profile (`GET /api/auth/me`) and orders (`GET /api/orders`) in parallel via `Future.wait` → displays user card (avatar, fullName, email, optional city) and order history cards (order #, date, total, items list) → "Log Out" calls `authProvider.logout()` and redirects to `/`.
+- **Token expiry:** Backend JWT expires in 1h. On 401, user must re-login. No refresh token flow.
+
+### 7. Styling (Design System)
 - **Do NOT** hardcode colors, radii, or spacing — use constants from `core/constants.dart`:
   ```dart
   AppColors.primary      // #003EC7
   AppColors.onSurface    // #191B25
   AppColors.accentEnergy // #FF6B00
   AppColors.surfaceMuted // #F4F5F7
+  AppColors.statusSuccess // #00875A
   AppRadius.defaultRadius // 8.0
   AppRadius.lg           // 16.0
   AppSpacing.md          // 16.0
@@ -126,12 +169,14 @@ SortBy.values:    recommended | priceLowToHigh | priceHighToLow | popularity
   ```
 - Use `Theme.of(context).textTheme.*` for typography (pre-configured with Manrope via `AppTheme.light`).
 - Use `NovaButton` with variant enum instead of raw `ElevatedButton`/`OutlinedButton`.
+- Cart screen uses hardcoded shipping (`$12.50`) and tax (`8%`) to match the web frontend.
 
-### 7. Icons
+### 8. Icons
 - Use Material Icons (`Icons.*`) from `Icons` class (e.g., `Icons.shopping_cart_outlined`, `Icons.search`, `Icons.person_outline`).
 
-### 8. Refresh / Sync
+### 9. Refresh / Sync
 - The home screen's `productsProvider` is a `FutureProvider` — it automatically refetches when watched filter state changes. No manual refresh needed for filter changes.
+- Cart persists automatically to `SharedPreferences` after every mutation. Auth persists token + user to `SharedPreferences` after login and restores on startup.
 
 ## Design System Colors
 
