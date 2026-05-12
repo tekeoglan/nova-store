@@ -382,8 +382,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _handleLogout() {
-    ref.read(authProvider.notifier).logout();
-    context.go('/');
+  Future<void> _handleLogout() async {
+    await ref.read(authProvider.notifier).logout();
+    if (mounted) context.go('/');
   }
 }

@@ -30,7 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     ref.listen(authProvider, (prev, next) {
       if (next.isAuthenticated && !prev!.isAuthenticated) {
-        context.pop();
+        context.go('/');
       }
     });
 

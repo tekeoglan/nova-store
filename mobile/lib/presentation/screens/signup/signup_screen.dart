@@ -38,7 +38,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     ref.listen(authProvider, (prev, next) {
       if (next.isAuthenticated && !prev!.isAuthenticated) {
-        context.pop();
+        context.go('/');
       }
     });
 
