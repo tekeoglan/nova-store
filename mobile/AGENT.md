@@ -53,8 +53,11 @@ mobile/lib/
     │   │   └── login_screen.dart     # Username/password form, auto-pop on auth
     │   ├── signup/
     │   │   └── signup_screen.dart    # Full registration form with validation
-    │   └── profile/
-    │       └── profile_screen.dart   # User info card + order history + logout
+    │   ├── profile/
+    │   │   └── profile_screen.dart   # User info card + order history + logout
+    │   └── product/
+    │       └── product_detail_screen.dart # Image gallery, info, features,
+    │                                      #   specs, related products, add-to-cart
     └── widgets/
         ├── hero_banner.dart          # Gradient overlay, "NEW ARRIVAL" badge, title, description,
         │                             #   "Shop Collection" button pinned to bottom
@@ -62,7 +65,7 @@ mobile/lib/
         ├── price_range_selector.dart # Horizontal chips: All Prices, Under 500, 500-2000, ...
         ├── product_grid.dart         # 2-column SliverGrid + shimmer loading + error state
         ├── product_card.dart         # Image (1:1), Sale badge, name (2 lines), stars, price,
-        │                             #   "Add to cart" icon button
+        │                             #   "Add to cart" icon button, tap navigates to /product/:id
         └── nova_button.dart          # Reusable: primary/secondary/outline/ghost variants
 ```
 
@@ -142,9 +145,11 @@ SortBy.values:    recommended | priceLowToHigh | priceHighToLow | popularity
 - Use `GoRouter` (defined in `app/router.dart`) for routing.
 - Push routes via `context.push('/product/$id')` or `context.go('/cart')`.
 - Keep route paths consistent with backend entity names.
-- Current routes: `/` (home), `/cart`, `/login`, `/signup`, `/profile`.
+- Current routes: `/` (home), `/cart`, `/login`, `/signup`, `/profile`, `/product/:id`.
 - Cart button in the AppBar navigates to `/cart` — wired with a badge showing `totalItems()` count.
 - Profile icon in the AppBar navigates to `/profile`.
+- Product card tap navigates to `/product/$id` — full detail page with gallery, info, add-to-cart.
+- Related product cards on the detail page also navigate via `pushReplacement` to the selected product.
 
 ### 6. Auth & Checkout Flow
 - **Login flow:** LoginScreen collects username/password → calls `authProvider.login()` → on success, `AuthNotifier` calls `POST /api/auth/login` + `GET /api/auth/me`, stores token + user in `SharedPreferences`, sets token on `ApiClient` interceptor → screen auto-pops back.
