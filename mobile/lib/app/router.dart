@@ -3,6 +3,7 @@ import '../presentation/screens/home/home_screen.dart';
 import '../presentation/screens/cart/cart_screen.dart';
 import '../presentation/screens/login/login_screen.dart';
 import '../presentation/screens/signup/signup_screen.dart';
+import '../presentation/screens/profile/profile_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -22,6 +23,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/signup',
       builder: (context, state) => const SignupScreen(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
     ),
   ],
 );

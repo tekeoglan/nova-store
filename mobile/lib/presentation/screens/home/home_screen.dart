@@ -67,7 +67,7 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.person_outline),
             color: AppColors.onSurface,
-            onPressed: () {},
+            onPressed: () => context.push('/profile'),
           ),
           const SizedBox(width: 4),
         ],

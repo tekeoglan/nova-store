@@ -10,6 +10,7 @@ class User {
   final String fullName;
   final String email;
   final int? customerId;
+  final String? city;
 
   User({
     required this.userId,
@@ -17,6 +18,7 @@ class User {
     required this.fullName,
     required this.email,
     this.customerId,
+    this.city,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class User {
       fullName: json['fullName'] as String? ?? '',
       email: json['email'] as String? ?? '',
       customerId: json['customerId'] as int?,
+      city: json['city'] as String?,
     );
   }
 
@@ -35,6 +38,7 @@ class User {
         'fullName': fullName,
         'email': email,
         'customerId': customerId,
+        'city': city,
       };
 }
 
