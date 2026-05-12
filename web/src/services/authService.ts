@@ -11,8 +11,13 @@ api.interceptors.request.use((config) => {
   const authStorage = localStorage.getItem('auth-storage');
   if (authStorage) {
     const { state } = JSON.parse(authStorage);
-    if (state?.staffAuth?.token) {
-      config.headers.Authorization = `Bearer ${state.staffAuth.token}`;
+    const url = config.url || '';
+    const requestPath = new URL(url, 'http://localhost').pathname;
+
+    if (requestPath.includes('/staff/') || requestPath.includes('/reports/')) {
+      if (state?.staffAuth?.token) {
+        config.headers.Authorization = `Bearer ${state.staffAuth.token}`;
+      }
     } else if (state?.userAuth?.token) {
       config.headers.Authorization = `Bearer ${state.userAuth.token}`;
     }

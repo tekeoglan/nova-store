@@ -17,10 +17,16 @@ require('./models/OrderDetail');
 require('./models/User');
 require('./models/Staff');
 const productRoutes = require('./routes/products');
+const orderRoutes = require('./routes/orders');
 
 const PORT = appConfig.port;
 
 const app = express();
+
+if (appConfig.env == 'development') {
+  const errorHandler = require('errorhandler')
+  app.use(errorHandler)
+}
 
 app.use(cors({ origin: appConfig.webURL }));
 app.use(express.json());
@@ -30,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/staff', staffAuthRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Ana sayfa
 app.get('/', (req, res) => {

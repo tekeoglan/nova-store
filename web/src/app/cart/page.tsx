@@ -1,20 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/Button';
 import { Trash2, Minus, Plus, ShoppingBag, Lock } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
+import { orderService } from '@/services/orderService';
 import Link from 'next/link';
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, totalPrice, totalItems } = useCartStore();
-  
+  const router = useRouter();
+  const { items, updateQuantity, removeItem, totalPrice, clearCart } = useCartStore();
+  const { userAuth } = useAuthStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const SUBTOTAL = totalPrice();
   const SHIPPING = items.length > 0 ? 12.50 : 0;
-  const TAX = SUBTOTAL * 0.08; // 8% tax
+  const TAX = SUBTOTAL * 0.08;
   const TOTAL = SUBTOTAL + SHIPPING + TAX;
+
+  const handleCheckout = async () => {
+    if (!userAuth.isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const orderItems = items.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+      }));
+
+      await orderService.createOrder(orderItems);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to place order';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      clearCart();
+      router.push('/');
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -42,10 +75,10 @@ export default function CartPage() {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <Navbar />
-      
+
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
         <h1 className="text-headline-lg font-bold text-on-surface mb-8">Shopping Cart</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Cart Items List */}
           <div className="lg:col-span-2 space-y-4">
@@ -54,37 +87,37 @@ export default function CartPage() {
                 <div className="w-32 h-32 rounded-lg overflow-hidden bg-surface-muted shrink-0">
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 </div>
-                
+
                 <div className="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
                   <div className="space-y-1">
                     <h3 className="text-body-md font-semibold text-on-surface">{item.name}</h3>
                     <p className="text-sm text-text-secondary">Qty: {item.quantity}</p>
                   </div>
-                  
+
                   <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
                     <div className="flex items-center border border-outline rounded-default px-2 py-1 bg-white">
-                      <button 
+                      <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className="p-1 text-outline hover:text-primary transition-colors"
                       >
                         <Minus size={16} />
                       </button>
                       <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                      <button 
+                      <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="p-1 text-outline hover:text-primary transition-colors"
                       >
                         <Plus size={16} />
                       </button>
                     </div>
-                    
+
                     <div className="text-right min-w-[80px]">
                       <span className="text-headline-md font-bold text-on-surface">
                         ${(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
-                    
-                    <button 
+
+                    <button
                       onClick={() => removeItem(item.id)}
                       className="p-2 text-outline hover:text-status-critical transition-colors"
                       title="Remove item"
@@ -101,7 +134,7 @@ export default function CartPage() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl border border-outline-variant p-8 sticky top-24 shadow-sm">
               <h2 className="text-headline-md font-bold text-on-surface mb-6">Order Summary</h2>
-              
+
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-sm text-text-secondary">
                   <span>Subtotal</span>
@@ -122,10 +155,21 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <Button variant="primary" className="w-full py-4 text-base font-bold mb-4">
-                Proceed to Checkout
+              {error && (
+                <div className="mb-4 p-3 bg-status-critical/10 text-status-critical text-sm rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <Button
+                variant="primary"
+                className="w-full py-4 text-base font-bold mb-4"
+                onClick={handleCheckout}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Proceed to Checkout'}
               </Button>
-              
+
               <div className="flex items-center justify-center gap-2 text-xs text-text-secondary">
                 <Lock size={12} />
                 Secure Checkout
@@ -134,7 +178,7 @@ export default function CartPage() {
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
