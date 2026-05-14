@@ -133,6 +133,39 @@ For Android emulator, use `10.0.2.2` (maps to host localhost). For iOS simulator
 |----------|---------|-------------|
 | `BACKEND_URL` | `http://localhost:8080/api` | Backend API base URL |
 
+## Screen Shots
+
+### Mobile
+
+<table>
+  <tr>
+    <td align="center">
+    <b>login</b>
+    <img src="assets/screenshots/mobile_login_screen.png" /><br/>
+    </td>
+    <td align="center">
+          <b>home</b>
+      <img src="assets/screenshots/mobile_home_screen.png" /><br/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+          <b>product detail</b>
+      <img src="assets/screenshots/mobile_detail_screen.png" /><br/>
+    </td>
+    <td align="center">
+    <b>cart</b>
+      <img src="assets/screenshots/mobile_cart_screen.png" /><br/> 
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+        <b>profile</b>
+      <img src="assets/screenshots/mobile_profile_screen.png" /><br/>
+    </td>
+  </tr>
+</table>
+
 ## License
 
 MIT
