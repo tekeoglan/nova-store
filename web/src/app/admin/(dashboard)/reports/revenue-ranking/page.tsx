@@ -26,7 +26,7 @@ export default function RevenueRankingPage() {
         const error = err as { response?: { status?: number } };
         if (error.response?.status === 403) {
           setError('Bu sayfaya erişim yetkiniz bulunmamaktadır.');
-        } else if (err.response?.status === 401) {
+        } else if (error.response?.status === 401) {
           router.push('/admin/login');
         } else {
           setError('Veriler yüklenirken bir hata oluştu.');
