@@ -53,6 +53,10 @@ docker compose up --build
 | Admin | admin@novastore.com | admin123 |
 | Moderator | mod@novastore.com | mod123 |
 
+| UserName | Password |
+|------|-------|
+| admin | admin123 |
+
 ## Setup Without Docker
 
 ### Prerequisites
