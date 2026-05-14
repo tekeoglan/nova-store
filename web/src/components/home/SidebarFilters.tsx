@@ -9,11 +9,11 @@ export const SidebarFilters = () => {
 
   const categories = ['All', 'Elektronik', 'Giyim', 'Ev ve Yaşam', 'Kozmetik', 'Kitap'];
   const priceRanges = [
-    { id: 'all', label: 'All Prices' },
-    { id: '0-500', label: 'Under 500' },
-    { id: '500-2000', label: '500 - 2000' },
-    { id: '2000-10000', label: '2000 - 10000' },
-    { id: '10000+', label: 'Over 10000' },
+    { id: 'all' as const, label: 'All Prices' },
+    { id: '0-500' as const, label: 'Under 500' },
+    { id: '500-2000' as const, label: '500 - 2000' },
+    { id: '2000-10000' as const, label: '2000 - 10000' },
+    { id: '10000+' as const, label: 'Over 10000' },
   ];
 
   const hasActiveFilters = category !== 'All' || priceRange !== 'all' || searchQuery !== '';

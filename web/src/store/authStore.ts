@@ -80,7 +80,6 @@ export const useAuthStore = create<AuthState>()(
         const p = persistedState as { userAuth?: Partial<AuthSession<User>>; staffAuth?: Partial<AuthSession<Staff>> };
         return {
           ...currentState,
-          ...persistedState,
           userAuth: { ...currentState.userAuth, ...p.userAuth },
           staffAuth: { ...currentState.staffAuth, ...p.staffAuth },
         };
